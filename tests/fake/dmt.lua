@@ -86,11 +86,13 @@ function FakeDMT.Install()
 
   function GetBonusYields(playerID, subject)
     FakeDMT.calls = FakeDMT.calls + 1
-    local mountains, districts, river, seaResources, water, plaza = 0, 0, false, 0, 0, 0
+    local mountains, districts, river, seaResources, water, plaza, forests = 0, 0, false, 0, 0, 0, 0
     for _, q in ipairs(neighbors(subject.X, subject.Y)) do
       local adj = GetMapPinSubject(playerID, q:GetX(), q:GetY())
       local f = GetRealizedPlotFeatures(playerID, q, adj)
       if q:IsMountain() then mountains = mountains + 1 end
+      local feature = GameInfo.Features[q:GetFeatureType()]
+      if feature and feature.FeatureType == "FEATURE_FOREST" and not f.ADJACENCY_DISTRICT then forests = forests + 1 end
       if f.ADJACENCY_DISTRICT then districts = districts + 1 end
       if f.ADJACENCY_DISTRICT == "DISTRICT_AQUEDUCT" or f.ADJACENCY_DISTRICT == "DISTRICT_DAM" then water = water + 1 end
       if f.ADJACENCY_DISTRICT == "DISTRICT_GOVERNMENT" then plaza = plaza + 1 end
@@ -101,7 +103,9 @@ function FakeDMT.Install()
     local k = subject.Key
     local half = math.floor(districts / 2)
     if k == "DISTRICT_CAMPUS" then y.YIELD_SCIENCE = mountains + half
-    elseif k == "DISTRICT_HOLY_SITE" then y.YIELD_FAITH = mountains + half
+    elseif k == "DISTRICT_HOLY_SITE" then y.YIELD_FAITH = mountains + math.floor(forests / 2) + half
+    -- Korea's Seowon: +4 by itself, −1 per adjacent district (District_Adjacencies, Self = 1).
+    elseif k == "DISTRICT_SEOWON" then y.YIELD_SCIENCE = 4 - districts
     elseif k == "DISTRICT_COMMERCIAL_HUB" then y.YIELD_GOLD = (river and 2 or 0) + half
     elseif k == "DISTRICT_HARBOR" then y.YIELD_GOLD = seaResources + half
     elseif k == "DISTRICT_INDUSTRIAL_ZONE" then y.YIELD_PRODUCTION = half + 2 * water

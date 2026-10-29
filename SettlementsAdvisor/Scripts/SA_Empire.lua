@@ -43,12 +43,14 @@ function SA_Empire.BuiltPlaza(playerID, cities)
 end
 
 -- Plans the given cities in order; returns { [city] = layout } and the total value.
--- prefer: { [plot] = district } pinned last time (SA_Layout KEEP_BONUS).
-function SA_Empire.PlanCities(playerID, cities, fixed, prefer)
+-- prefer: { [plot] = district } pinned last time (SA_Layout KEEP_BONUS); strategy: the empire's
+-- strategy (002 R5: roles of districts). The cities are each other's centers for regional
+-- buildings (002 R6).
+function SA_Empire.PlanCities(playerID, cities, fixed, prefer, strategy)
   local all = copy(fixed or {})
   local layouts, total = {}, 0
   for _, c in ipairs(cities) do
-    local layout = SA_Coarse.CityLayout(c, playerID, { fixed = all, prefer = prefer })
+    local layout = SA_Coarse.CityLayout(c, playerID, { fixed = all, prefer = prefer, strategy = strategy, centers = cities })
     layouts[c] = layout
     total = total + layout.Value
     for _, pl in ipairs(layout.Placements) do all[pl.Plot] = pl.District end
@@ -158,7 +160,7 @@ local function sortedCopy(list)
 end
 
 -- { Sites = { future city plots }, Plaza, Layouts, Value } or nil. prefer: as PlanCities.
-function SA_Empire.Triangle(playerID, real, prefer)
+function SA_Empire.Triangle(playerID, real, prefer, strategy)
   local need = 3 - #real
   if need < 1 or need > 2 then return nil end
   local minD, maxD = minCityDistance(), SA_Empire.TRIANGLE_MAX
@@ -226,7 +228,7 @@ function SA_Empire.Triangle(playerID, real, prefer)
   local best = nil
   for n = 1, #withPlaza do
     local c = withPlaza[n]
-    local layouts, total = SA_Empire.PlanCities(playerID, c.Centers, triangleFixed(c.Sites, c.Plaza), prefer)
+    local layouts, total = SA_Empire.PlanCities(playerID, c.Centers, triangleFixed(c.Sites, c.Plaza), prefer, strategy)
     local value = total + c.Cheap
     if best == nil or value > best.Value + 1e-9 then
       best = { Sites = c.Sites, Plaza = c.Plaza, Layouts = layouts, Value = value, Centers = c.Centers }
@@ -237,7 +239,7 @@ end
 
 -- The kept triangle planned again on today's map, with its value counted as in Triangle; nil
 -- when the cities changed or a site or the Plaza is no longer legal.
-local function keptTriangle(playerID, cities, tri, signature, prefer)
+local function keptTriangle(playerID, cities, tri, signature, prefer, strategy)
   if tri == nil or tri.Signature ~= signature then return nil end
   for _, s in ipairs(tri.Sites) do
     if not SA_Candidates.Check(s) then return nil end
@@ -247,7 +249,7 @@ local function keptTriangle(playerID, cities, tri, signature, prefer)
   local centers = sortedCopy(cities)
   for _, s in ipairs(tri.Sites) do centers[#centers + 1] = s end
   table.sort(centers)
-  local layouts, total = SA_Empire.PlanCities(playerID, centers, triangleFixed(tri.Sites, tri.Plaza), prefer)
+  local layouts, total = SA_Empire.PlanCities(playerID, centers, triangleFixed(tri.Sites, tri.Plaza), prefer, strategy)
   local cheap = 0
   for _, s in ipairs(tri.Sites) do
     cheap = cheap + (SA_Coarse.Score(s, playerID).Score or 0)
@@ -265,6 +267,7 @@ function SA_Empire.Signature(cities) return table.concat(cities, ",") end
 -- reaching city per candidate). opts.keepTriangle = the previous plan's triangle: kept while
 -- legal; opts.searchTriangle looks for a new one, which wins only by TRIANGLE_SWITCH.
 -- opts.prefer = { [plot] = district } pinned last time (SA_Layout KEEP_BONUS).
+-- opts.strategy = the empire's strategy (SA_Strategy.Get): roles of districts (002 R5).
 function SA_Empire.Plan(playerID, opts)
   playerID = playerID or SA_World.LocalPlayer()
   opts = opts or {}
@@ -277,10 +280,10 @@ function SA_Empire.Plan(playerID, opts)
   local fixed = {}
   -- One or two cities: plan the triangle of the first three.
   if built == nil and GameInfo.Districts[SA_Empire.PLAZA] ~= nil and #cities < 3 then
-    local kept = keptTriangle(playerID, cities, opts.keepTriangle, plan.Signature, opts.prefer)
+    local kept = keptTriangle(playerID, cities, opts.keepTriangle, plan.Signature, opts.prefer, opts.strategy)
     local tri = kept
     if kept == nil or opts.searchTriangle then
-      local found = SA_Empire.Triangle(playerID, cities, opts.prefer)
+      local found = SA_Empire.Triangle(playerID, cities, opts.prefer, opts.strategy)
       if kept == nil or (found ~= nil and found.Value > kept.Value + SA_Empire.TRIANGLE_SWITCH * math.abs(kept.Value)) then
         tri = found
       end
@@ -305,7 +308,7 @@ function SA_Empire.Plan(playerID, opts)
     if best == nil then
       local bestValue = -math.huge
       for _, cand in ipairs(SA_Empire.Candidates(playerID, cities)) do
-        local _, value = SA_Empire.PlanCities(playerID, cand.Touching, { [cand.Plot] = SA_Empire.PLAZA }, opts.prefer)
+        local _, value = SA_Empire.PlanCities(playerID, cand.Touching, { [cand.Plot] = SA_Empire.PLAZA }, opts.prefer, opts.strategy)
         if value > bestValue + 1e-9 then bestValue, best = value, cand end
       end
     end
@@ -314,7 +317,7 @@ function SA_Empire.Plan(playerID, opts)
       fixed[best.Plot] = SA_Empire.PLAZA
     end
   end
-  plan.Layouts = SA_Empire.PlanCities(playerID, cities, fixed, opts.prefer)
+  plan.Layouts = SA_Empire.PlanCities(playerID, cities, fixed, opts.prefer, opts.strategy)
   return plan
 end
 

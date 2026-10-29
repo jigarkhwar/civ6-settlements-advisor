@@ -275,18 +275,18 @@ end
 -- opts: cost(plot, district) -> value lost when the district takes the plot (default 0);
 --       plots -> candidate plots (default: the site's 3-ring);
 --       fixed -> {[plot] = districtType} already there (built districts, kept);
---       prefer -> {[plot] = districtType} pinned last time: keeping them earns KEEP_BONUS.
+--       prefer -> {[plot] = districtType} pinned last time: keeping them earns KEEP_BONUS;
+--       regional(plot, district) -> value of the cities a regional building there would cover
+--       (002 R6): part of the objective and reported as Regional.
 function SA_Layout.Solve(site, districts, opts)
   opts = opts or {}
   local cost = opts.cost or function() return 0 end
-  local searchCost = cost
-  if opts.prefer ~= nil and next(opts.prefer) ~= nil then
-    local prefer = opts.prefer
-    searchCost = function(p, d)
-      local c = cost(p, d)
-      if prefer[p] == d then c = c - SA_Layout.KEEP_BONUS end
-      return c
-    end
+  local regional = opts.regional or function() return 0 end
+  local prefer = opts.prefer or {}
+  local searchCost = function(p, d)
+    local c = cost(p, d) - regional(p, d)
+    if prefer[p] == d then c = c - SA_Layout.KEEP_BONUS end
+    return c
   end
   local order = {}
   for _, d in ipairs(districts) do order[#order + 1] = d end
@@ -320,15 +320,18 @@ function SA_Layout.Solve(site, districts, opts)
     SA_Layout.STACK_WEIGHT = weight
   end
 
-  local layout = { Site = site, Placements = {}, Unplaced = {}, Adjacency = 0, Cost = 0, Proven = proven }
+  local layout = { Site = site, Placements = {}, Unplaced = {}, Adjacency = 0, Cost = 0, Regional = 0, Proven = proven }
   local placedTypes = {}
   for _, p in ipairs(sortedPlots(st.placed)) do
     local d = st.placed[p]
     local y = SA_DMT.Yields(p)
     local v = SA_Rules.Price(y)
-    layout.Placements[#layout.Placements + 1] = { District = d, Plot = p, Yields = y, Value = v, Cost = cost(p, d) }
+    local r, covered = regional(p, d)
+    layout.Placements[#layout.Placements + 1] = { District = d, Plot = p, Yields = y, Value = v, Cost = cost(p, d),
+      Regional = r, Covered = covered or 0 }
     layout.Adjacency = layout.Adjacency + v
     layout.Cost = layout.Cost + cost(p, d)
+    layout.Regional = layout.Regional + r
     placedTypes[d] = (placedTypes[d] or 0) + 1
   end
   local fixedAfter = 0
@@ -344,6 +347,6 @@ function SA_Layout.Solve(site, districts, opts)
     return a.Plot < b.Plot
   end)
   layout.Weighted = SA_Layout.ADJACENCY_WEIGHT * layout.Adjacency
-  layout.Value = layout.Weighted - layout.Cost
+  layout.Value = layout.Weighted + layout.Regional - layout.Cost
   return layout
 end

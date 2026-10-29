@@ -16,7 +16,7 @@ for y = 0, H - 1 do
 end
 FakeWorld.Install({ width = W, height = H, player = 0, plots = plots,
   units = { { player = 0, id = 1, type = "UNIT_SETTLER", x = 10, y = 10 } } })
-for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Rank" }) do include(m) end
+for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize", "SA_Rank" }) do include(m) end
 local t0 = os.clock()
 local n = 0
 for i = 0, W * H - 1 do

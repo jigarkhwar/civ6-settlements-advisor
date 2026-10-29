@@ -37,6 +37,7 @@ local PRIMARY = {
   CoastalLowlands = "CoastalLowlandType", RandomEvents = "RandomEventType",
   Happinesses = "HappinessType", GlobalParameters = "Name", Adjacency_YieldChanges = "ID",
   Buildings = "BuildingType", Yields = "YieldType",
+  Modifiers = "ModifierId", DynamicModifiers = "ModifierType", Victories = "VictoryType", Eras = "EraType",
 }
 
 local function buildTable(name, rows)
@@ -79,6 +80,7 @@ local BOOL_COLUMNS = {
   Districts_XP2 = { "OnePerRiver", "PreventsFloods", "PreventsDrought" },
   Improvement_ValidResources = { "MustRemoveFeature" },
   Buildings = { "IsWonder", "Capital", "InternalOnly" },
+  AiFavoredItems = { "Favored" },
 }
 
 local function loadRules()
@@ -241,6 +243,7 @@ function FakeWorld.Install(map)
         function city:GetY() return self._c.y end
         function city:GetOwner() return self._c.player end
         function city:IsCapital() return self._c.capital == true end
+        function city:GetPopulation() return self._c.population or 1 end
         function city:GetYield(enum)
           local y = self._c.yields or {}
           return y[enum] or 0
@@ -286,15 +289,29 @@ function FakeWorld.Install(map)
   }
 
   PlayerConfigurations = setmetatable({}, { __index = function(t, id)
+    local values = {}
     local cfg = {
       GetCivilizationTypeName = function() return (id == pid and map.civ) or "CIVILIZATION_AMERICA" end,
       GetLeaderTypeName = function() return (id == pid and map.leader) or "LEADER_T_ROOSEVELT" end,
+      GetValue = function(_, key) return values[key] end,
+      SetValue = function(_, key, value) values[key] = value end,
     }
     rawset(t, id, cfg)
     return cfg
   end })
 
-  Game = { GetLocalPlayer = function() return pid end, GetCurrentGameTurn = function() return map.turn or 1 end }
+  -- Victories enabled in the game: map.victories (a list), else every victory of the rules.
+  local enabled = {}
+  if map.victories then
+    for _, v in ipairs(map.victories) do enabled[v] = true end
+  else
+    for _, row in ipairs(loadRules().Victories or {}) do enabled[row.VictoryType] = true end
+  end
+  Game = {
+    GetLocalPlayer = function() return pid end,
+    GetCurrentGameTurn = function() return map.turn or 1 end,
+    IsVictoryEnabled = function(v) return enabled[v] == true end,
+  }
   GameConfiguration = {
     GetRuleSet = function() return map.ruleset or "RULESET_EXPANSION_2" end,
     GetGameSpeedType = function() return gi.GameSpeeds[map.speed or "GAMESPEED_STANDARD"].Hash end,

@@ -11,7 +11,7 @@ local MINUS = "\226\136\146"
 local function setup(map, lang)
   local w = FakeWorld.Install(map)
   FakeLocale.Install(lang or "ru_RU")
-  for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Explain" }) do
+  for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize", "SA_Explain", "SA_Strategy" }) do
     include(m)
   end
   SA_World.Reset(); SA_Rules.Reset(); SA_Prior.Reset(); SA_Tiles.Reset()
@@ -174,7 +174,8 @@ function T.test_why_lines_in_words()
   local w = setup(Maps.river)
   local site = SA_Coarse.Score(idx(w, 5, 4))
   local why = SA_Explain.Why(site)
-  truthy(#why >= 3 and #why <= 5, "3–5 lines")
+  truthy(#why >= 3 and #why <= 6, "3–6 lines")
+  truthy(why[1]:find("Город вырастет примерно до", 1, true), "growth first (002 FR-010): " .. why[1])
   local text = table.concat(why, "\n")
   truthy(text:find("Пресная вода", 1, true), text)
   truthy(text:find("Клетки:", 1, true) and text:find("×", 1, true), text)
@@ -200,6 +201,60 @@ function T.test_travel_line()
   truthy(lines[2]:find("не дойдёт", 1, true), lines[2])
   lines = SA_Explain.Lines(site, site, {})
   truthy(not lines[2]:find("Дорога", 1, true), "no road line without a Settler")
+end
+
+-- The Settler's verdict in words (002 US1, FR-004, FR-005): right after the title and the road.
+function T.test_verdict_lines()
+  local w = setup(Maps.river)
+  local site = SA_Coarse.Score(idx(w, 5, 4))
+  eq(SA_Explain.VerdictText(nil), nil)
+  local here = SA_Explain.VerdictText({ Kind = "here", Here = 1, Best = 9, Turns = 3, Gain = 6.2, Share = 0.058 })
+  truthy(here:find("Основывай здесь", 1, true) and here:find("6 %", 1, true) and here:find("3", 1, true), here)
+  local best = SA_Explain.VerdictText({ Kind = "here", Here = 9, Best = 9, Turns = 0, Gain = 0, Share = 0 })
+  truthy(best:find("Основывай здесь", 1, true) and best:find("лучшее", 1, true), best)
+  local nxt = SA_Explain.VerdictText({ Kind = "next", Here = 2, Best = 9, Turns = 3, Gain = 2, Share = 0.02 })
+  truthy(nxt:find("в 1 ходе", 1, true), nxt)
+  local go = SA_Explain.VerdictText({ Kind = "go", Here = 1, Best = 9, Turns = 2, Gain = 14.4, Share = 0.14 })
+  truthy(go:find("Иди на № 1", 1, true) and go:find("+14", 1, true) and go:find("2", 1, true), go)
+  local low = SA_Explain.VerdictText({ Kind = "here", Here = 1, Best = 9, Turns = 3, Gain = 1, Share = 0.01, LowData = true })
+  truthy(low:find("мало данных", 1, true), low)
+
+  local lines = SA_Explain.Lines(site, site, { Travel = { Turns = 0, Penalty = 0 },
+    Verdict = { Kind = "here", Here = site.Index, Best = 9, Turns = 3, Gain = 6.2, Share = 0.058 } })
+  truthy(lines[2]:find("сразу", 1, true), "the road first: " .. lines[2])
+  truthy(lines[3]:find("Основывай здесь", 1, true), "then the verdict: " .. lines[3])
+  truthy(not table.concat(lines, "\n"):find("LOC_SA_", 1, true))
+  -- The verdict belongs to its own plot only.
+  lines = SA_Explain.Lines(site, site, { Verdict = { Kind = "here", Here = site.Index + 1, Best = 9, Turns = 3, Gain = 1, Share = 0.01 } })
+  for _, l in ipairs(lines) do truthy(not l:find("Основывай", 1, true), l) end
+  setup(Maps.river, "en_US")
+  truthy(SA_Explain.VerdictText({ Kind = "go", Here = 1, Best = 9, Turns = 2, Gain = 14.4, Share = 0.14 }):find("+14", 1, true))
+end
+
+-- Strategy and specialization in words (002 US3, FR-017): after the growth line, before the
+-- lines of 001; reasons come from the game's data.
+function T.test_strategy_and_specialization_lines()
+  local map = {}
+  for k, v in pairs(Maps.river) do map[k] = v end
+  map.leader, map.civ = "LEADER_SEONDEOK", "CIVILIZATION_KOREA"
+  local w = setup(map)
+  include("SA_Strategy")
+  local strategy = SA_Strategy.Get(0, "AUTO")
+  local text = SA_Explain.StrategyText(strategy)
+  truthy(text:find("Стратегия: наука", 1, true), text)
+  truthy(text:find("вместо", 1, true), "the Seowon replacing the Campus: " .. text)
+  local site = SA_Coarse.Score(idx(w, 5, 4))
+  site.Layout = { Placements = {}, Specialization = "DISTRICT_CAMPUS" }
+  local lines = SA_Explain.Lines(site, site, { Strategy = strategy })
+  truthy(lines[2]:find("Город вырастет", 1, true), "growth first: " .. lines[2])
+  truthy(lines[3]:find("Стратегия:", 1, true), "then the strategy: " .. lines[3])
+  truthy(lines[4]:find("Специализация:", 1, true) and lines[4]:find("CAMPUS", 1, true), "then the specialization: " .. lines[4])
+  truthy(not table.concat(lines, "\n"):find("LOC_SA_", 1, true))
+  -- Balanced: said so.
+  map.leader, map.civ = "LEADER_POUNDMAKER", "CIVILIZATION_CREE"
+  setup(map)
+  include("SA_Strategy")
+  truthy(SA_Explain.StrategyText(SA_Strategy.Get(0, "AUTO")):find("сбалансированная", 1, true))
 end
 
 function T.test_refusal_for_every_reason()

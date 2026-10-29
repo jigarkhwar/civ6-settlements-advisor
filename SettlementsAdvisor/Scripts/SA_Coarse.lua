@@ -38,7 +38,17 @@ local function amenitySlope()
   return ((content.NonFoodYieldModifier or 0) - (displeased.NonFoodYieldModifier or 0)) / 100 / span
 end
 
-local function median(list)
+local median
+
+-- Value of one amenity in a typical city of the player (002 R6): the median city's non-food
+-- yields, or SA_Rules.TYPICAL_CITY_VALUE without cities, times the slope above.
+function SA_Coarse.AmenityValue(playerID)
+  local values = {}
+  for _, y in ipairs(SA_World.CityYields(playerID or SA_World.LocalPlayer())) do values[#values + 1] = nonFoodValue(y) end
+  return (median(values) or SA_Rules.TYPICAL_CITY_VALUE) * amenitySlope()
+end
+
+function median(list)
   if #list == 0 then return nil end
   table.sort(list)
   local m = math.floor((#list + 1) / 2)
@@ -174,6 +184,42 @@ function SA_Coarse.LayoutDistricts(index, playerID)
   return list
 end
 
+-- Two passes (002 research R5): all districts first, then only the ones the forecast city
+-- builds (SA_Specialize.Select within SA_Growth's district limit), placed again on their own.
+-- opts: current (the city's population now), builtPop (built districts that use the limit),
+-- strategy, keep ({ [plot] = district } on the mod's pins).
+-- Regional buildings (002 R6) count among `centers`: the player's cities, the planned city
+-- sites in `fixed` and the site itself. `fixed` here is the whole plan, not only the part near
+-- the site: a regional district of a farther city may already cover a city in range.
+local function regionalFor(site, playerID, fixed, extra)
+  local seen, centers = { [site] = true }, { site }
+  local function add(c) if not seen[c] then seen[c] = true; centers[#centers + 1] = c end end
+  for _, c in ipairs(SA_World.Cities()) do if c.Player == playerID then add(c.Plot) end end
+  for p, d in pairs(fixed or {}) do if d == "DISTRICT_CITY_CENTER" then add(p) end end
+  for _, c in ipairs(extra or {}) do add(c) end
+  table.sort(centers)
+  return SA_Specialize.RegionalFunction(centers, fixed, playerID)
+end
+
+local function limitedLayout(site, playerID, districts, opts, solveOpts)
+  local full = SA_Layout.Solve(site, districts, solveOpts)
+  local forecast = SA_Growth.Forecast(site, playerID, { districts = districts, current = opts.current })
+  local slots = math.max(0, forecast.Limit - (opts.builtPop or 0))
+  local sel = SA_Specialize.Select(full, opts.strategy, slots, opts.keep)
+  local layout = full
+  if #sel.Dropped > 0 then
+    local again = {}
+    for _, d in ipairs(sel.Districts) do again[#again + 1] = d end
+    -- Districts with no legal plot stay listed as unplaced.
+    for _, d in ipairs(full.Unplaced) do again[#again + 1] = d end
+    layout = SA_Layout.Solve(site, again, solveOpts)
+  end
+  layout.Forecast = forecast
+  layout.Dropped = sel.Dropped
+  layout.Specialization = SA_Specialize.Label(layout, opts.strategy)
+  return layout
+end
+
 -- District layout of a legal site (FR-016, FR-017c); plot costs from SA_Coarse.PlotCost.
 -- opts.fixed: districts planned for the player's cities ({ [plot] = district }): taken plots
 -- that count for adjacency, so a new city stacks with its neighbours (the user, 2026-10-29:
@@ -187,7 +233,9 @@ function SA_Coarse.Layout(index, playerID, opts)
   end
   if not SA_Candidates.Check(index) then return nil end
   local cost = SA_Coarse.PlotCost(index, playerID, fixed)
-  return SA_Layout.Solve(index, SA_Coarse.LayoutDistricts(index, playerID), { cost = cost, fixed = fixed })
+  return limitedLayout(index, playerID, SA_Coarse.LayoutDistricts(index, playerID),
+    { strategy = opts.strategy },
+    { cost = cost, fixed = fixed, regional = regionalFor(index, playerID, opts.fixed, opts.centers) })
 end
 
 -- District plan of an existing city (FR-031, FR-032): built districts stay where they are
@@ -198,13 +246,15 @@ end
 function SA_Coarse.CityLayout(cityPlot, playerID, opts)
   playerID = playerID or SA_World.LocalPlayer()
   opts = opts or {}
-  local built, builtCount = {}, {}
+  local built, builtCount, builtPop = {}, {}, 0
   for _, p in ipairs(SA_World.Ring(cityPlot, 3)) do
     local s = SA_World.Snapshot(p)
     if s.District ~= nil and s.Owner == playerID and s.District ~= "DISTRICT_CITY_CENTER"
       and s.District ~= "DISTRICT_WONDER" then
       built[p] = s.District
       builtCount[s.District] = (builtCount[s.District] or 0) + 1
+      local row = GameInfo.Districts[s.District]
+      if row == nil or row.RequiresPopulation ~= false then builtPop = builtPop + 1 end
     end
   end
   local remaining = {}
@@ -217,13 +267,16 @@ function SA_Coarse.CityLayout(cityPlot, playerID, opts)
     local have = (builtCount[d] or 0) > 0 and d or ((builtCount[key] or 0) > 0 and key or nil)
     if have then builtCount[have] = builtCount[have] - 1 else remaining[#remaining + 1] = d end
   end
-  local fixed = {}
-  for p, d in pairs(built) do fixed[p] = d end
+  local fixed, allFixed = {}, {}
+  for p, d in pairs(built) do fixed[p] = d; allFixed[p] = d end
   for p, d in pairs(opts.fixed or {}) do
+    if allFixed[p] == nil then allFixed[p] = d end
     if fixed[p] == nil and p ~= cityPlot and SA_World.Distance(cityPlot, p) <= 4 then fixed[p] = d end
   end
   local cost = SA_Coarse.PlotCost(cityPlot, playerID, fixed)
-  return SA_Layout.Solve(cityPlot, remaining, { cost = cost, fixed = fixed, prefer = opts.prefer })
+  return limitedLayout(cityPlot, playerID, remaining,
+    { current = SA_World.CityPopulation(cityPlot), builtPop = builtPop, strategy = opts.strategy, keep = opts.prefer },
+    { cost = cost, fixed = fixed, prefer = opts.prefer, regional = regionalFor(cityPlot, playerID, allFixed, opts.centers) })
 end
 
 -- Score of a site; with opts.layout the districts' plots are not worked and the Districts
@@ -241,11 +294,13 @@ function SA_Coarse.Score(index, playerID, opts)
   end
 
   local districts, excludedDistricts = SA_Coarse.SiteDistricts(index, playerID)
-  local k = #districts
-  local needed = math.max(1, 3 * k - 2)
-
-  -- The city grows to the size its districts need, limited by food and plots, not housing.
   local layout = opts.layout
+
+  -- The city works as many plots as it grows citizens (002 R3): the forecast's population, and
+  -- as many plots are kept for districts as its district limit allows.
+  local forecast = (layout and layout.Forecast) or SA_Growth.Forecast(index, playerID, { districts = districts })
+  local k = math.min(#districts, forecast.Limit)
+  local needed = math.max(1, forecast.Population)
   local excludedPlots, reserve = {}, k
   if layout ~= nil then
     reserve = 0
@@ -397,12 +452,18 @@ function SA_Coarse.Score(index, playerID, opts)
       distReasons[#distReasons + 1] = reason("Districts:" .. pl.District .. ":" .. pl.Plot, "LOC_SA_REASON_DISTRICT",
         { pl.District, SA_Coarse.YieldText(pl.Yields) }, SA_Layout.ADJACENCY_WEIGHT * pl.Value, pl.Plot)
     end
+    for _, pl in ipairs(layout.Placements) do
+      if (pl.Regional or 0) > 0 then
+        distReasons[#distReasons + 1] = reason("Districts:regional:" .. pl.District .. ":" .. pl.Plot, "LOC_SA_REASON_REGIONAL",
+          { pl.District, pl.Covered or 0 }, pl.Regional, pl.Plot)
+      end
+    end
     for _, d in ipairs(layout.Unplaced) do
       distReasons[#distReasons + 1] = reason("Districts:unplaced:" .. d, "LOC_SA_REASON_DISTRICT_UNPLACED", { d }, 0)
     end
     distReasons[#distReasons + 1] = reason("Districts:proof",
       layout.Proven and "LOC_SA_REASON_LAYOUT_PROVEN" or "LOC_SA_REASON_LAYOUT_BEST_FOUND", {}, 0)
-    dist = component("Districts", layout.Weighted, distReasons)
+    dist = component("Districts", layout.Weighted + (layout.Regional or 0), distReasons)
   else
     dist = component("Districts", 0, { reason("Districts:pending", "LOC_SA_REASON_DISTRICTS_PENDING", {}, 0) })
   end
@@ -410,7 +471,7 @@ function SA_Coarse.Score(index, playerID, opts)
   local site = {
     Index = index, Legal = true, Unrevealed = unrevealed, LowData = unrevealed * 2 > #ring,
     Components = { tiles, water, luxury, strategic, oneTime, dist },
-    Work = work, Districts = districts, ExcludedDistricts = excludedDistricts,
+    Work = work, Districts = districts, ExcludedDistricts = excludedDistricts, Forecast = forecast,
     Status = layout and "ready" or "coarse", Layout = layout, Version = SA_World.Version(),
   }
   return SA_Score.Combine(site, nil)

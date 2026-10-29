@@ -68,6 +68,9 @@
       <File>Scripts/SA_Layout.lua</File>
       <File>Scripts/SA_Pins.lua</File>
       <File>Scripts/SA_Empire.lua</File>
+      <File>Scripts/SA_Growth.lua</File>
+      <File>Scripts/SA_Strategy.lua</File>
+      <File>Scripts/SA_Specialize.lua</File>
     </ImportFiles>
     <AddUserInterfaces id="sa_main">
       <Properties>
@@ -104,6 +107,9 @@
     <File>Scripts/SA_Layout.lua</File>
     <File>Scripts/SA_Pins.lua</File>
     <File>Scripts/SA_Empire.lua</File>
+    <File>Scripts/SA_Growth.lua</File>
+    <File>Scripts/SA_Strategy.lua</File>
+    <File>Scripts/SA_Specialize.lua</File>
     <File>UI/SA_Main.xml</File>
     <File>UI/SA_Main.lua</File>
     <File>UI/SA_PlotToolTip.lua</File>

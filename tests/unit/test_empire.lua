@@ -12,8 +12,9 @@ local function setup(map)
     if name == "dmt_yieldcalculator" then FakeDMT.Install() else realInclude(name) end
   end
   for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Scheduler", "SA_Candidates", "SA_Prior", "SA_Tiles",
-                       "SA_Score", "SA_Coarse", "SA_DMT", "SA_Layout", "SA_Pins", "SA_Empire" }) do include(m) end
-  SA_World.Reset(); SA_Rules.Reset(); SA_Prior.Reset(); SA_Tiles.Reset()
+                       "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize", "SA_DMT", "SA_Layout", "SA_Pins", "SA_Empire",
+                       "SA_Strategy" }) do include(m) end
+  SA_World.Reset(); SA_Rules.Reset(); SA_Prior.Reset(); SA_Tiles.Reset(); SA_Specialize.Reset()
   SA_DMT.Init(0)
   return w
 end
@@ -209,6 +210,71 @@ function T.test_wanted_adds_plaza_to_its_owner()
   for _, c in ipairs(plan.Cities) do
     if c ~= owner then eq(SA_Empire.Wanted(plan, c)[plan.Plaza.Plot], nil) end
   end
+end
+
+
+-- 002 US3: the plan follows the leader. A religious leader plans Holy Sites a science leader does
+-- not; one Industrial Zone covers all three cities with its regional buildings and no city is
+-- counted twice (SC-006).
+local function strategyPlan(leader, civ, terrain)
+  local map = triangle()
+  map.leader, map.civ = leader, civ
+  if terrain then
+    map.default = { t = terrain }
+    for _, c in ipairs(map.cities) do map.plots[c.x .. "," .. c.y] = { t = terrain, owner = 0 } end
+  else
+    -- Woods on every third plot, as on a real map: a Holy Site has something to stand by.
+    for y = 0, map.height - 1 do
+      for x = 0, map.width - 1 do
+        local key = x .. "," .. y
+        if map.plots[key] == nil and (x + 2 * y) % 3 == 0 then map.plots[key] = { t = "TERRAIN_GRASS", f = "FEATURE_FOREST" } end
+      end
+    end
+  end
+  setup(map)
+  local strategy = SA_Strategy.Get(0, "AUTO")
+  return SA_Empire.Plan(0, { strategy = strategy }), strategy
+end
+
+local function count(plan, district)
+  local n = 0
+  for _, layout in pairs(plan.Layouts) do
+    for _, pl in ipairs(layout.Placements) do if pl.District == district then n = n + 1 end end
+  end
+  return n
+end
+
+function T.test_plan_follows_the_leader()
+  local india, s1 = strategyPlan("LEADER_GANDHI", "CIVILIZATION_INDIA")
+  eq(s1.Victory, "VICTORY_RELIGIOUS")
+  local korea = strategyPlan("LEADER_SEONDEOK", "CIVILIZATION_KOREA")
+  truthy(count(india, "DISTRICT_HOLY_SITE") > count(korea, "DISTRICT_HOLY_SITE"),
+    count(india, "DISTRICT_HOLY_SITE") .. " Holy Sites vs " .. count(korea, "DISTRICT_HOLY_SITE"))
+  local labels = 0
+  for _, layout in pairs(india.Layouts) do
+    if layout.Specialization == "DISTRICT_HOLY_SITE" then labels = labels + 1 end
+  end
+  truthy(labels >= 1, "a religious city")
+  -- Regional coverage: one Industrial Zone reaches all three cities, none is counted twice.
+  local covered = 0
+  for _, layout in pairs(india.Layouts) do
+    for _, pl in ipairs(layout.Placements) do
+      if pl.District == "DISTRICT_INDUSTRIAL_ZONE" then covered = covered + (pl.Covered or 0) end
+    end
+  end
+  eq(covered, 3)
+end
+
+-- On hills the Seowon (+4 science) is chosen and names the city; on flat grass it gives little.
+function T.test_seowon_on_hills()
+  local plan, strategy = strategyPlan("LEADER_SEONDEOK", "CIVILIZATION_KOREA", "TERRAIN_GRASS_HILLS")
+  eq(strategy.Victory, "VICTORY_TECHNOLOGY")
+  truthy(count(plan, "DISTRICT_SEOWON") >= 1, "Seowons planned on hills")
+  local named = false
+  for _, layout in pairs(plan.Layouts) do
+    if layout.Specialization == "DISTRICT_SEOWON" then named = true end
+  end
+  truthy(named, "a Seowon city")
 end
 
 return T

@@ -142,7 +142,7 @@ end
 -- is the layout's adjacency and the components still add up to the score (FR-013).
 function T.test_site_score_with_layout()
   local w = setup(Maps.river)
-  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse" }) do include(m) end
+  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize" }) do include(m) end
   SA_Prior.Reset(); SA_Tiles.Reset()
   local site = idx(w, 5, 4)
   local layout = SA_Coarse.Layout(site, 0)
@@ -151,7 +151,7 @@ function T.test_site_score_with_layout()
   eq(scored.Status, "ready")
   local districts
   for _, c in ipairs(scored.Components) do if c.Key == "Districts" then districts = c end end
-  near(districts.Value, layout.Weighted, 1e-9)
+  near(districts.Value, layout.Weighted + layout.Regional, 1e-9, "adjacency and regional coverage (002 R6)")
   local taken = {}
   for _, pl in ipairs(layout.Placements) do taken[pl.Plot] = true end
   for _, p in ipairs(scored.Work.Plots) do truthy(not taken[p], "a district plot is not worked") end
@@ -173,7 +173,7 @@ function T.test_city_layout_keeps_built_districts()
   map.plots["7,3"] = { t = "TERRAIN_GRASS", owner = 0, district = "DISTRICT_CAMPUS" }
   map.cities = { { player = 0, x = 5, y = 4 } }
   local w = setup(map)
-  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse" }) do include(m) end
+  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize" }) do include(m) end
   SA_Prior.Reset(); SA_Tiles.Reset()
   local city = idx(w, 5, 4)
   local layout = SA_Coarse.CityLayout(city, 0)
@@ -204,7 +204,7 @@ end
 -- the Dam and the Aqueduct (FR-017b; the user: «дамба стакается с промышкой и акведуком»).
 function T.test_dam_and_industrial_zone_stack()
   local w = setup(Maps.river)
-  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse" }) do include(m) end
+  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize" }) do include(m) end
   SA_Prior.Reset(); SA_Tiles.Reset()
   local site = idx(w, 5, 4)
   local list = {}
@@ -223,7 +223,7 @@ end
 -- not pulled into the stack (the user, 2026-10-29).
 function T.test_filler_districts_take_worst_plots()
   local w = setup(Maps.river)
-  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse" }) do include(m) end
+  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize" }) do include(m) end
   SA_Prior.Reset(); SA_Tiles.Reset()
   eq(SA_Rules.IsFiller("DISTRICT_ENCAMPMENT"), true)
   eq(SA_Rules.IsFiller("DISTRICT_AERODROME"), true)
@@ -268,7 +268,7 @@ function T.test_plot_cost_against_replacement()
   local map = { width = 12, height = 10, player = 0, default = { t = "TERRAIN_GRASS", f = "FEATURE_FOREST" },
     plots = { ["5,5"] = { t = "TERRAIN_GRASS", r = "RESOURCE_SHEEP" } } }
   local w = setup(map)
-  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse" }) do include(m) end
+  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize" }) do include(m) end
   SA_Prior.Reset(); SA_Tiles.Reset()
   local site = idx(w, 5, 4)
   local cost = SA_Coarse.PlotCost(site, 0)
@@ -284,6 +284,96 @@ function T.test_unplaced_without_legal_plot()
   local layout = SA_Layout.Solve(site, { "DISTRICT_CAMPUS", "DISTRICT_HARBOR" }, {})
   eq(#layout.Unplaced, 1)
   eq(layout.Unplaced[1], "DISTRICT_HARBOR")
+end
+
+
+-- ===========================================================================
+-- 002 US2: only districts within the city's district limit (FR-008, FR-009, SC-003)
+-- ===========================================================================
+
+local function withSites(map)
+  local w = setup(map)
+  for _, m in ipairs({ "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth",
+                       "SA_Specialize", "SA_Pins" }) do include(m) end
+  SA_Prior.Reset(); SA_Tiles.Reset()
+  return w
+end
+
+local function popDistricts(layout)
+  local n = 0
+  for _, pl in ipairs(layout.Placements) do
+    if GameInfo.Districts[pl.District].RequiresPopulation ~= false then n = n + 1 end
+  end
+  return n
+end
+
+function T.test_layout_respects_district_limit()
+  local w = withSites(hills())
+  local site = idx(w, 5, 4)
+  local layout = SA_Coarse.Layout(site, 0)
+  truthy(layout.Forecast ~= nil, "the layout carries its forecast")
+  eq(layout.Forecast.Limit, SA_Growth.Limit(layout.Forecast.Population))
+  truthy(popDistricts(layout) <= layout.Forecast.Limit,
+    popDistricts(layout) .. " districts for a limit of " .. layout.Forecast.Limit)
+  -- Districts without a population requirement (Aqueduct, Dam) come on top of the limit.
+  for _, d in ipairs(SA_Coarse.LayoutDistricts(site, 0)) do
+    if GameInfo.Districts[d].RequiresPopulation == false then
+      local placed = false
+      for _, pl in ipairs(layout.Placements) do if pl.District == d then placed = true end end
+      for _, u in ipairs(layout.Unplaced) do if u == d then placed = true end end
+      truthy(placed, d .. " is not cut by the limit")
+    end
+  end
+  -- Pins follow the plan: only the selected districts get one (FR-009).
+  local wanted = SA_Pins.Wanted(layout)
+  local n = 0
+  for _ in pairs(wanted) do n = n + 1 end
+  eq(n, #layout.Placements)
+  for _, dr in ipairs(layout.Dropped) do
+    for _, d in pairs(wanted) do truthy(d ~= dr.District or dr.Reason ~= "LIMIT", dr.District .. " was dropped") end
+  end
+end
+
+-- A hungry site plans fewer districts than a fed one (SC-003).
+function T.test_hungry_site_plans_fewer_districts()
+  local w = withSites(Maps.river)
+  local fed = SA_Coarse.Layout(idx(w, 5, 4), 0)
+  w = withSites(Maps.desert)
+  local hungry = SA_Coarse.Layout(idx(w, 5, 4), 0)
+  truthy(hungry.Forecast.Limit < fed.Forecast.Limit)
+  truthy(popDistricts(hungry) < popDistricts(fed), popDistricts(hungry) .. " vs " .. popDistricts(fed))
+end
+
+-- A city that already built more districts than its limit gets no new ones (US2, scenario 2).
+function T.test_city_over_its_limit_gets_no_new_districts()
+  local map = { width = 10, height = 8, player = 0, default = { t = "TERRAIN_DESERT" }, plots = {
+    ["5,4"] = { t = "TERRAIN_DESERT", owner = 0 },
+    ["6,4"] = { t = "TERRAIN_DESERT", owner = 0, district = "DISTRICT_CAMPUS" },
+    ["4,4"] = { t = "TERRAIN_DESERT", owner = 0, district = "DISTRICT_THEATER" },
+    ["5,5"] = { t = "TERRAIN_DESERT", owner = 0, district = "DISTRICT_HOLY_SITE" } },
+    cities = { { player = 0, x = 5, y = 4, population = 2 } } }
+  local w = withSites(map)
+  local layout = SA_Coarse.CityLayout(idx(w, 5, 4), 0)
+  truthy(layout.Forecast.Limit < 3, "a desert city stays small: limit " .. layout.Forecast.Limit)
+  eq(popDistricts(layout), 0, "three built districts over the forecast limit: nothing more is planned")
+end
+
+-- Districts on the mod's pins are kept in the selection (stickiness, FR-016).
+function T.test_selection_keeps_pinned_districts()
+  local w = withSites(hills())
+  local site = idx(w, 5, 4)
+  local full = SA_Layout.Solve(site, SA_Coarse.LayoutDistricts(site, 0), {})
+  local sel = SA_Specialize.Select(full, nil, 1)
+  eq(#sel.Districts - #sel.Unlimited, 1)
+  -- The weakest placed district, pinned, wins the single slot when the others are close.
+  local weakest = nil
+  for _, pl in ipairs(full.Placements) do
+    if GameInfo.Districts[pl.District].RequiresPopulation ~= false
+      and (weakest == nil or pl.Value < weakest.Value) then weakest = pl end
+  end
+  local best = sel.Districts[1]
+  local kept = SA_Specialize.Select(full, nil, 1, { [weakest.Plot] = weakest.District })
+  truthy(kept.Districts[1] == best or kept.Districts[1] == weakest.District)
 end
 
 return T

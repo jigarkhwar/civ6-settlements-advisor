@@ -26,6 +26,25 @@
     <Replace Tag="LOC_SA_WHY_TRAVEL" Language="ru_RU"><Text>Дорога: {1} ход. — минус {2} к баллу</Text></Replace>
     <Replace Tag="LOC_SA_WHY_TRAVEL_NOW" Language="ru_RU"><Text>Город можно основать сразу</Text></Replace>
     <Replace Tag="LOC_SA_WHY_UNREACHABLE" Language="ru_RU"><Text>Поселенец сюда не дойдёт</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_STRATEGY" Language="ru_RU"><Text>Стратегия: {1} — {2}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_SPECIALIZATION" Language="ru_RU"><Text>Специализация: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_TECHNOLOGY" Language="ru_RU"><Text>наука</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_CULTURE" Language="ru_RU"><Text>культура</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_RELIGIOUS" Language="ru_RU"><Text>религия</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_CONQUEST" Language="ru_RU"><Text>завоевание</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_DIPLOMATIC" Language="ru_RU"><Text>дипломатия</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_BALANCED" Language="ru_RU"><Text>сбалансированная</Text></Replace>
+    <Replace Tag="LOC_SA_SIGNAL_DISTRICT" Language="ru_RU"><Text>{1} вместо района «{2}»</Text></Replace>
+    <Replace Tag="LOC_SA_SIGNAL_AI" Language="ru_RU"><Text>предпочтения лидера</Text></Replace>
+    <Replace Tag="LOC_SA_SIGNAL_NONE" Language="ru_RU"><Text>явного уклона нет</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_GROWTH" Language="ru_RU"><Text>Город вырастет примерно до {1} жит. → районов: {2}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_GROWTH_FOOD" Language="ru_RU"><Text>{1} (дальше не хватает еды)</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_GROWTH_HOUSING" Language="ru_RU"><Text>{1} (дальше упирается в жильё)</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_HERE" Language="ru_RU"><Text>Основывай здесь: № 1 лучше только на {1} %, а дорога {2} ход.</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_HERE_BEST" Language="ru_RU"><Text>Основывай здесь: это лучшее место рядом</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_NEXT" Language="ru_RU"><Text>Основывай в 1 ходе на отмеченной клетке: № 1 лучше только на {1} %, а дорога {2} ход.</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_GO" Language="ru_RU"><Text>Иди на № 1: +{1} к баллу, {2} ход. дороги</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_LOW_DATA" Language="ru_RU"><Text>{1} (мало данных — открой карту вокруг)</Text></Replace>
     <Replace Tag="LOC_SA_WHY_DISTRICTS" Language="ru_RU"><Text>Районы: {1}</Text></Replace>
     <Replace Tag="LOC_SA_WHY_DISTRICTS_NONE" Language="ru_RU"><Text>Районы: соседских бонусов здесь нет</Text></Replace>
     <Replace Tag="LOC_SA_WHY_DISTRICTS_PENDING" Language="ru_RU"><Text>Районы: раскладка считается…</Text></Replace>
@@ -67,6 +86,7 @@
     <Replace Tag="LOC_SA_REASON_DISTRICTS_PENDING" Language="ru_RU"><Text>районы появятся с раскладкой</Text></Replace>
     <Replace Tag="LOC_SA_REASON_DISTRICT" Language="ru_RU"><Text>{1} {2}</Text></Replace>
     <Replace Tag="LOC_SA_REASON_DISTRICT_UNPLACED" Language="ru_RU"><Text>{1}: негде поставить</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_REGIONAL" Language="ru_RU"><Text>{1}: региональные здания достанут до городов: {2}</Text></Replace>
     <Replace Tag="LOC_SA_REASON_LAYOUT_PROVEN" Language="ru_RU"><Text>раскладка: лучшая из всех вариантов</Text></Replace>
     <Replace Tag="LOC_SA_REASON_LAYOUT_BEST_FOUND" Language="ru_RU"><Text>раскладка: лучшая найденная</Text></Replace>
 

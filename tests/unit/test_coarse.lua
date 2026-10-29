@@ -8,7 +8,7 @@ local ORDER = { "Tiles", "Water", "Luxury", "Strategic", "OneTime", "Districts" 
 
 local function setup(map)
   local w = FakeWorld.Install(map)
-  for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse" }) do include(m) end
+  for _, m in ipairs({ "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize" }) do include(m) end
   SA_World.Reset(); SA_Rules.Reset(); SA_Prior.Reset(); SA_Tiles.Reset()
   return w
 end
@@ -142,15 +142,19 @@ function T.test_tiles_net_of_eaten_food()
   near(sum, comp(site, "Tiles").Value, 1e-9, "tile reasons add up")
 end
 
--- A production site that feeds itself beats a farm site whose extra food is only surplus.
+-- Production is not ignored: per citizen a production site gives more than a farm site whose
+-- extra food is only surplus. Since 002 (R3) the city's size comes from its forecast, so the
+-- farm site may still win in total by growing twice as big; per citizen the hills must win.
 function T.test_production_not_ignored()
   local map = { width = 12, height = 10, player = 0, default = { t = "TERRAIN_GRASS" }, plots = {} }
   for y = 0, 9 do for x = 0, 4 do map.plots[x .. "," .. y] = { t = "TERRAIN_GRASS_HILLS", f = "FEATURE_FOREST" } end end
   local w = setup(map)
   local hills = SA_Coarse.Score(idx(w, 2, 4))
   local flat = SA_Coarse.Score(idx(w, 9, 4))
-  truthy(comp(hills, "Tiles").Value > comp(flat, "Tiles").Value,
-    string.format("hills %.1f > grass %.1f", comp(hills, "Tiles").Value, comp(flat, "Tiles").Value))
+  local perHills = comp(hills, "Tiles").Value / hills.Work.Citizens
+  local perFlat = comp(flat, "Tiles").Value / flat.Work.Citizens
+  truthy(perHills > perFlat, string.format("hills %.1f > grass %.1f per citizen", perHills, perFlat))
+  truthy(flat.Forecast.Population > hills.Forecast.Population, "the farm site grows bigger")
 end
 
 function T.test_new_luxury_counts_more_than_owned()

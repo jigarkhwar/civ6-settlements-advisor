@@ -174,6 +174,23 @@ local function workable(index, site)
   return true
 end
 
+-- Workable plots of a site for the population forecast (002 R3): { {index, food}, ... }, the
+-- most nourishing first (ties: lower plot index). excluded: plots taken by districts.
+function SA_Tiles.Workable(site, playerID, excluded)
+  playerID = playerID or SA_World.LocalPlayer()
+  local out = {}
+  for _, i in ipairs(SA_World.Ring(site, 3)) do
+    if not (excluded and excluded[i]) and workable(i, site) then
+      out[#out + 1] = { index = i, food = SA_Tiles.Tile(i, playerID).food or 0 }
+    end
+  end
+  table.sort(out, function(a, b)
+    if a.food ~= b.food then return a.food > b.food end
+    return a.index < b.index
+  end)
+  return out
+end
+
 -- Best set of exactly n items (by value) whose food feeds n citizens with the center's food;
 -- nil if impossible. Items are sorted by plot index; result is deterministic.
 local function bestSet(items, n, centerFood, perCitizen)

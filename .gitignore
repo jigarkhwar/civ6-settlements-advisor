@@ -8,3 +8,9 @@ Thumbs.db
 __pycache__/
 *.pyc
 tests/fixtures/gameinfo.lua
+.vscode/
+.idea/
+# Screenshots never go into the repository
+*.png
+*.jpg
+*.jpeg

@@ -27,6 +27,98 @@ SA_Rules.HORIZON_TURNS = 50
 -- constant, calibrated in T078).
 SA_Rules.EARLY_TURNS = 30
 
+-- ===========================================================================
+-- Model constants of feature 002 (city specialization and tempo; FR-023, plan.md "Model
+-- Constants"). Other modules only read them.
+-- ===========================================================================
+
+-- Turns over which a city's population is forecast and over which tempo is weighed, at
+-- standard speed (002 research R1, R3). Calibrated in 002 T042.
+SA_Rules.FORECAST_TURNS = 100
+
+-- A turn's weight halves every this many turns (002 R1): delaying a city by 1 turn costs
+-- about 2.5 % of its value, by 5 turns about 12 % (the linear road cost of 001 gave 10 %).
+SA_Rules.TEMPO_HALF_LIFE = 30
+
+-- "Found here" when the site at hand is at most this share below the best reachable one
+-- (002 R2): less than the usual spread between neighbouring sites, more than the noise of
+-- estimating unrevealed plots.
+SA_Rules.HERE_MARGIN = 0.10
+
+-- Latest era of housing buildings a city counts on within FORECAST_TURNS (002 R3): the Granary
+-- (Pottery) yes, the Sewer (Sanitation) no.
+SA_Rules.HOUSING_ERA_MAX = "ERA_MEDIEVAL"
+
+-- Share of the food surplus of the most nourishing plots that goes into growth (002 R3): a city
+-- does not work only food plots; half is the middle between all-food and the value plan, which
+-- keeps the surplus near zero. Calibrated in 002 T042.
+SA_Rules.GROWTH_FOOD_SHARE = 0.5
+
+-- Strategy (002 R4): signal weights by kind, and the least total for a non-balanced strategy.
+SA_Rules.SIGNAL_WEIGHT = { district = 3, building = 2, modifier = 1, effect = 1, ai = 0.5, aiVictory = 1 }
+SA_Rules.STRATEGY_MIN = 2
+
+-- Words of a modifier's effect type and the yield (or pseudo yield) they stand for, used when
+-- the modifier's arguments name no yield (002 R4). Matched in this order.
+SA_Rules.EFFECT_WORDS = {
+  { "TECHNOLOGY", "YIELD_SCIENCE" }, { "SCIENCE", "YIELD_SCIENCE" },
+  { "CIVIC", "YIELD_CULTURE" }, { "CULTURE", "YIELD_CULTURE" }, { "TOURISM", "YIELD_CULTURE" },
+  { "FAITH", "YIELD_FAITH" }, { "RELIGIO", "YIELD_FAITH" }, { "BELIEF", "YIELD_FAITH" },
+  { "FAVOR", "FAVOR" }, { "COMBAT", "COMBAT" }, { "STRENGTH", "COMBAT" },
+  { "TRADE", "YIELD_GOLD" }, { "GOLD", "YIELD_GOLD" },
+}
+
+-- The victory a yield leans to (002 R4). Gold sets no victory: it strengthens the Commercial
+-- Hub and the Harbor as secondary districts. Diplomatic victory runs on Diplomatic Favor.
+SA_Rules.YIELD_VICTORY = {
+  YIELD_SCIENCE = "VICTORY_TECHNOLOGY", YIELD_CULTURE = "VICTORY_CULTURE", YIELD_FAITH = "VICTORY_RELIGIOUS",
+  COMBAT = "VICTORY_CONQUEST", FAVOR = "VICTORY_DIPLOMATIC",
+}
+
+-- The AI's victory strategies a leader favors (AiFavoredItems, system Strategies) and the
+-- victory each one stands for (002 R4).
+SA_Rules.AI_STRATEGY_VICTORY = {
+  VICTORY_STRATEGY_SCIENCE_VICTORY = "VICTORY_TECHNOLOGY", VICTORY_STRATEGY_CULTURAL_VICTORY = "VICTORY_CULTURE",
+  VICTORY_STRATEGY_RELIGIOUS_VICTORY = "VICTORY_RELIGIOUS", VICTORY_STRATEGY_MILITARY_VICTORY = "VICTORY_CONQUEST",
+  VICTORY_STRATEGY_DIPLOMATIC_VICTORY = "VICTORY_DIPLOMATIC",
+}
+
+-- A modifier argument naming more yields than this ("YIELD_PRODUCTION, YIELD_FOOD, …") boosts
+-- everything alike and says nothing about a lean (002 R4).
+SA_Rules.SIGNAL_MAX_YIELDS = 2
+
+-- Fixed order of victories for ties (constitution IV) and for the top-panel list.
+SA_Rules.VICTORY_ORDER = { "VICTORY_TECHNOLOGY", "VICTORY_CULTURE", "VICTORY_RELIGIOUS", "VICTORY_CONQUEST", "VICTORY_DIPLOMATIC" }
+
+-- Key districts of each victory (002 R5).
+SA_Rules.VICTORY_DISTRICTS = {
+  VICTORY_TECHNOLOGY = { "DISTRICT_CAMPUS" },
+  VICTORY_CULTURE = { "DISTRICT_THEATER" },
+  VICTORY_RELIGIOUS = { "DISTRICT_HOLY_SITE" },
+  VICTORY_CONQUEST = { "DISTRICT_ENCAMPMENT", "DISTRICT_INDUSTRIAL_ZONE" },
+  VICTORY_DIPLOMATIC = { "DISTRICT_COMMERCIAL_HUB", "DISTRICT_HARBOR" },
+}
+
+-- Non-food yields of a typical city while the player has none, to price an amenity a regional
+-- building gives (002 R6): about a capital's yields in the early game. Model constant.
+SA_Rules.TYPICAL_CITY_VALUE = 20
+
+-- Weight of a district's role when a city's districts are chosen (002 R5).
+SA_Rules.ROLE_WEIGHT = { key = 2, secondary = 1, filler = 0.5 }
+
+-- A key district with less adjacency than this "gives little" and is chosen as a secondary one.
+SA_Rules.KEY_MIN_ADJ = 1
+
+-- Share of a regional building's value per covered city counted for its district: the
+-- building comes later than the district (002 R6).
+SA_Rules.REGIONAL_WEIGHT = 0.5
+
+-- Turn counts above scale with game speed like building costs do (GameSpeeds.CostMultiplier).
+function SA_Rules.SpeedScale()
+  local speed = GameInfo.GameSpeeds[GameConfiguration.GetGameSpeedType()]
+  return (speed and speed.CostMultiplier or 100) / 100
+end
+
 -- Developer mode: extra checks that print SA_MISMATCH lines (research R27).
 SA_Rules.DEV = false
 

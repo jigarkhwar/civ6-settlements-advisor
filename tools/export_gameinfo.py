@@ -34,6 +34,12 @@ TABLES = [
     "Units", "Units_XP2",
     "Civilizations", "CivilizationTraits", "Leaders", "LeaderTraits", "Traits", "TraitModifiers",
     "Happinesses", "Technologies", "Civics", "Buildings", "Yields",
+    # 002: leader and civilization strategy, regional buildings, victories (research R4, R6, R8)
+    "Modifiers", "ModifierArguments", "DynamicModifiers", "Building_YieldChanges",
+    "AiLists", "AiFavoredItems", "Victories", "Eras", "CivilizationLeaders",
+    # Unique improvement neighbour rules (001 T096: polders were not checked offline without them)
+    "Improvement_ValidAdjacentTerrains", "Improvement_InvalidAdjacentFeatures",
+    "Improvement_ValidAdjacentResources",
 ]
 
 

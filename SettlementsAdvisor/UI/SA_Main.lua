@@ -18,6 +18,9 @@ include("SA_DMT")
 include("SA_Layout")
 include("SA_Pins")
 include("SA_Empire")
+include("SA_Growth")
+include("SA_Strategy")
+include("SA_Specialize")
 
 local RULESET_SUPPORTED = "RULESET_EXPANSION_2"
 local LAYER = UILens.CreateLensLayerHash("Hex_Coloring_Government")
@@ -109,6 +112,24 @@ local m_keepTriangle = nil  -- the triangle of the last plan (cities 2 and 3 and
 local m_triangleFresh = true -- search the triangle again (load, turn, new Settler, new city)
 local m_planned = {}        -- plot -> district planned for the player's cities: new sites stack with them
 local m_worldStale = true   -- borders may have moved: snapshots are rebuilt before the next plan
+local m_strategy = nil      -- the empire's strategy (002 US3): roles of districts in every plan
+local m_victoryChoice = "AUTO" -- the player's choice of victory (002 US4)
+
+-- The strategy from the leader and civilization (002 R4): on load and each turn (policies and
+-- beliefs change the player's modifiers). A new victory makes every layout stale.
+local function refreshStrategy()
+  local ok, s = pcall(SA_Strategy.Get, Game.GetLocalPlayer(), m_victoryChoice)
+  if not ok then print("SA_ERROR strategy: " .. tostring(s)) return false end
+  local changed = m_strategy == nil or m_strategy.Victory ~= s.Victory
+  m_strategy = s
+  if changed then
+    print("SA_STRATEGY " .. tostring(s.Victory) .. (s.Auto and " auto" or " chosen"))
+    for _, site in pairs(m_sites) do
+      if site.Status == "ready" then site.Stale = true end
+    end
+  end
+  return changed
+end
 
 local function loadPinRecord(pid)
   return SA_Pins.Decode(PlayerConfigurations[pid]:GetValue(SA_Pins.KEY))
@@ -203,7 +224,7 @@ local function updateEmpire()
     end
   end
   local plan = SA_Empire.Plan(pid, { keep = m_keepPlaza, keepTriangle = m_keepTriangle,
-    searchTriangle = m_triangleFresh, prefer = prefer })
+    searchTriangle = m_triangleFresh, prefer = prefer, strategy = m_strategy })
   m_triangleFresh = false
   m_keepPlaza = plan.Plaza
   m_keepTriangle = plan.Triangle
@@ -268,7 +289,7 @@ local function runLayouts()
       updateEmpire()
     elseif best ~= nil then
       m_layoutQueue[best] = nil
-      local layout = SA_Coarse.Layout(best, nil, { fixed = m_planned })
+      local layout = SA_Coarse.Layout(best, nil, { fixed = m_planned, strategy = m_strategy })
       if layout ~= nil then m_sites[best] = SA_Coarse.Score(best, nil, { layout = layout }) end
       m_needDraw = true
       if best == m_hovered then LuaEvents.PlotInfo_UpdatePlotTooltip() end
@@ -353,18 +374,25 @@ local function buildView(unit)
   -- get there. Sites are compared by the score minus the road. The game's pathfinder runs for
   -- the best TRAVEL_EXACT sites; the rest get an estimate by distance (a pathfinder call per
   -- plot of the radius would stall the frame on every step).
+  -- Sites within two turns of moves get the exact road too: the verdict (002 R2) weighs the
+  -- sites the Settler can found on this turn and the next one, low-data ones included.
+  local moves = (unit.GetMaxMoves and unit:GetMaxMoves()) or 2
+  if moves < 1 then moves = 2 end
   local travel, legal = {}, {}
   for _, s in ipairs(nearby) do
-    if s.Legal and not s.LowData then legal[#legal + 1] = s end
+    if s.Legal and not s.LowData then
+      legal[#legal + 1] = s
+    elseif s.Legal and SA_World.Distance(origin, s.Index) <= 2 * moves then
+      local t = SA_World.TurnsTo(unit, s.Index)
+      travel[s.Index] = t ~= nil and { Turns = t } or false
+    end
   end
   table.sort(legal, function(a, b)
     if a.Score ~= b.Score then return a.Score > b.Score end
     return a.Index < b.Index
   end)
-  local moves = (unit.GetMaxMoves and unit:GetMaxMoves()) or 2
-  if moves < 1 then moves = 2 end
   for n, s in ipairs(legal) do
-    if n <= TRAVEL_EXACT or s.Status == "ready" then
+    if n <= TRAVEL_EXACT or s.Status == "ready" or SA_World.Distance(origin, s.Index) <= 2 * moves then
       local t = SA_World.TurnsTo(unit, s.Index)
       travel[s.Index] = t ~= nil and { Turns = t } or false
     else
@@ -410,6 +438,18 @@ local function buildView(unit)
   end
   pending = pending or layoutsPending
 
+  -- The verdict (002 R2) compares like with like: once the top three has layouts, the sites at
+  -- hand need theirs too, and are asked for here.
+  local verdictSites = {}
+  for _, s in ipairs(nearby) do
+    local t = travel[s.Index]
+    local atHand = t and t ~= false and not t.Estimate and (t.Turns or 0) <= 1
+    if s.Legal and atHand and #ready > 0 and s.Status ~= "ready" then requestLayout(s.Index, 2) end
+    if s.Legal and (#ready == 0 or s.Status == "ready") then verdictSites[#verdictSites + 1] = s end
+  end
+  local previous = (m_view ~= nil and m_view.UnitID == unit:GetID()) and m_view.Verdict or nil
+  local verdict = SA_Rank.Verdict(verdictSites, travel, top, previous)
+
   local anyLegal = false
   for _, s in ipairs(allSites()) do if s.Legal then anyLegal = true break end end
   local message = nil
@@ -424,6 +464,7 @@ local function buildView(unit)
     UnitID = unit:GetID(), Origin = origin, Nearby = nearby, Sites = m_sites, Hovered = m_hovered,
     Thresholds = SA_Rank.Thresholds(nearby, origin, SA_World.Distance, travel),
     Travel = travel, Top = top, TopProven = proven and not pending, Message = message, Pending = pending,
+    Verdict = verdict,
   }
 end
 
@@ -451,7 +492,8 @@ local function tooltipLines(plotIndex)
     if t == false then road = false
     else road = { Turns = t.Turns, Penalty = SA_Rank.TravelPenalty(site.Score, t.Turns) } end
   end
-  return SA_Explain.Lines(site, m_view.Top[1], { Rank = rank, TopProven = m_view.TopProven, Travel = road })
+  return SA_Explain.Lines(site, m_view.Top[1], { Rank = rank, TopProven = m_view.TopProven, Travel = road,
+    Verdict = m_view.Verdict, Strategy = m_strategy })
 end
 
 Shared.GetLines = function(plotIndex)
@@ -490,11 +532,13 @@ local function paintFlag(inst, color)
   inst.FlagDarken:SetColor(UI.DarkenLightenColor(color, -85, 255))
 end
 
-local function showMessage(key, plotIndex)
+local function showText(text, plotIndex)
   local inst = m_messages:GetInstance()
-  inst.Text:SetText(Locale.Lookup(key))
+  inst.Text:SetText(text)
   placeAnchor(inst, plotIndex)
 end
+
+local function showMessage(key, plotIndex) showText(Locale.Lookup(key), plotIndex) end
 
 -- "[ICON_Food]2[ICON_Production]6" for a plot's best yields; "~" marks expected ones.
 local function yieldText(tile)
@@ -607,7 +651,10 @@ local function draw()
   for _, s in ipairs(m_view.Top) do
     topParts[#topParts + 1] = s.Index .. ":" .. math.floor(SA_Rank.Effective(s, m_view.Travel) + 0.5)
   end
+  local v = m_view.Verdict
+  local verdictText = (m_view.Message == nil) and SA_Explain.VerdictText(v) or nil
   local topSignature = table.concat(topParts, ",") .. "|" .. tostring(m_view.Message) .. "|" .. m_view.Origin
+    .. "|" .. tostring(verdictText) .. "|" .. tostring(v and v.Here)
   if topSignature == m_topSignature then drawWork() return end
   m_topSignature = topSignature
 
@@ -621,7 +668,12 @@ local function draw()
   end
 
   m_messages:ResetInstances()
-  if m_view.Message ~= nil then showMessage(m_view.Message, m_view.Origin) end
+  if m_view.Message ~= nil then
+    showMessage(m_view.Message, m_view.Origin)
+  elseif verdictText ~= nil then
+    -- "Found in 1 turn" stands over the plot it means: that is its mark (002 R2).
+    showText(verdictText, (v.Kind == "next" and v.Here) or m_view.Origin)
+  end
   drawWork()
 end
 
@@ -678,6 +730,8 @@ local function OnLoadScreenClose()
     local ok, err = SA_DMT.Init(Game.GetLocalPlayer())
     m_dmtReady = ok == true
     print("SA_DMT ready=" .. tostring(m_dmtReady) .. (err and (" error=" .. tostring(err)) or ""))
+    m_strategy = nil
+    refreshStrategy()
     enqueueAll()
     -- Cities with the mod's pins are planned again on load: things changed while it was off.
     if #SA_Empire.Cities(Game.GetLocalPlayer()) > 0 then requestEmpire(nil, true) end
@@ -690,6 +744,7 @@ end
 local function OnLocalPlayerTurnBegin()
   if not m_dmtReady then return end
   SA_DMT.RefreshModifiers()
+  refreshStrategy()
   m_worldStale = true
   local pid = Game.GetLocalPlayer()
   if #SA_Empire.Cities(pid) > 0 then requestEmpire(nil, #SA_World.Settlers(pid) > 0) end

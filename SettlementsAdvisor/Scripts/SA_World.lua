@@ -262,6 +262,38 @@ function SA_World.CityYields(playerID)
   return out
 end
 
+-- Population of the player's own city on a plot, nil if there is none (feature 002, FR-007).
+function SA_World.CityPopulation(plotIndex)
+  local pid = Game.GetLocalPlayer()
+  for _, city in Players[pid]:GetCities():Members() do
+    local p = Map.GetPlot(city:GetX(), city:GetY())
+    if p ~= nil and p:GetIndex() == plotIndex then return city:GetPopulation() end
+  end
+  return nil
+end
+
+-- Victories enabled in this game, in SA_Rules.VICTORY_ORDER (feature 002, R7).
+function SA_World.EnabledVictories()
+  local out = {}
+  for _, v in ipairs(SA_Rules.VICTORY_ORDER) do
+    if GameInfo.Victories[v] ~= nil and Game.IsVictoryEnabled(v) then out[#out + 1] = v end
+  end
+  return out
+end
+
+-- Traits of a player's leader and civilization, sorted and without repeats (feature 002, R4).
+-- Only the player's own configuration is read (constitution IX).
+function SA_World.PlayerTraits(playerID)
+  local cfg = PlayerConfigurations[playerID]
+  local leader, civ = cfg:GetLeaderTypeName(), cfg:GetCivilizationTypeName()
+  local seen, out = {}, {}
+  local function add(t) if t ~= nil and not seen[t] then seen[t] = true; out[#out + 1] = t end end
+  for row in GameInfo.LeaderTraits() do if row.LeaderType == leader then add(row.TraitType) end end
+  for row in GameInfo.CivilizationTraits() do if row.CivilizationType == civ then add(row.TraitType) end end
+  table.sort(out)
+  return out, leader, civ
+end
+
 -- True if the player already has at least one copy of a resource (for "new kind" checks).
 function SA_World.PlayerHasResource(playerID, resourceType)
   local row = GameInfo.Resources[resourceType]

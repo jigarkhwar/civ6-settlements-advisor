@@ -26,6 +26,25 @@
     <Replace Tag="LOC_SA_WHY_TRAVEL" Language="en_US"><Text>Road: {1} turns — minus {2} to the score</Text></Replace>
     <Replace Tag="LOC_SA_WHY_TRAVEL_NOW" Language="en_US"><Text>The city can be founded right away</Text></Replace>
     <Replace Tag="LOC_SA_WHY_UNREACHABLE" Language="en_US"><Text>The Settler cannot get here</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_STRATEGY" Language="en_US"><Text>Strategy: {1} — {2}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_SPECIALIZATION" Language="en_US"><Text>Specialization: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_TECHNOLOGY" Language="en_US"><Text>science</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_CULTURE" Language="en_US"><Text>culture</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_RELIGIOUS" Language="en_US"><Text>religion</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_CONQUEST" Language="en_US"><Text>conquest</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_DIPLOMATIC" Language="en_US"><Text>diplomacy</Text></Replace>
+    <Replace Tag="LOC_SA_STRATEGY_BALANCED" Language="en_US"><Text>balanced</Text></Replace>
+    <Replace Tag="LOC_SA_SIGNAL_DISTRICT" Language="en_US"><Text>{1} instead of {2}</Text></Replace>
+    <Replace Tag="LOC_SA_SIGNAL_AI" Language="en_US"><Text>the leader&apos;s preferences</Text></Replace>
+    <Replace Tag="LOC_SA_SIGNAL_NONE" Language="en_US"><Text>no clear lean</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_GROWTH" Language="en_US"><Text>The city grows to about {1} citizens → districts: {2}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_GROWTH_FOOD" Language="en_US"><Text>{1} (food runs out beyond that)</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_GROWTH_HOUSING" Language="en_US"><Text>{1} (housing stops it)</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_HERE" Language="en_US"><Text>Found here: #1 is only {1}% better and {2} turns away</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_HERE_BEST" Language="en_US"><Text>Found here: this is the best site nearby</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_NEXT" Language="en_US"><Text>Found in 1 turn on the marked plot: #1 is only {1}% better and {2} turns away</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_GO" Language="en_US"><Text>Go to #1: +{1} to the score, {2} turns of road</Text></Replace>
+    <Replace Tag="LOC_SA_VERDICT_LOW_DATA" Language="en_US"><Text>{1} (little data — explore around)</Text></Replace>
     <Replace Tag="LOC_SA_WHY_DISTRICTS" Language="en_US"><Text>Districts: {1}</Text></Replace>
     <Replace Tag="LOC_SA_WHY_DISTRICTS_NONE" Language="en_US"><Text>Districts: no adjacency bonuses here</Text></Replace>
     <Replace Tag="LOC_SA_WHY_DISTRICTS_PENDING" Language="en_US"><Text>Districts: layout in progress…</Text></Replace>
@@ -67,6 +86,7 @@
     <Replace Tag="LOC_SA_REASON_DISTRICTS_PENDING" Language="en_US"><Text>districts come with the layout</Text></Replace>
     <Replace Tag="LOC_SA_REASON_DISTRICT" Language="en_US"><Text>{1} {2}</Text></Replace>
     <Replace Tag="LOC_SA_REASON_DISTRICT_UNPLACED" Language="en_US"><Text>{1}: no place for it</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_REGIONAL" Language="en_US"><Text>{1}: regional buildings reach {2} cities</Text></Replace>
     <Replace Tag="LOC_SA_REASON_LAYOUT_PROVEN" Language="en_US"><Text>layout: best of all options</Text></Replace>
     <Replace Tag="LOC_SA_REASON_LAYOUT_BEST_FOUND" Language="en_US"><Text>layout: best found</Text></Replace>
 

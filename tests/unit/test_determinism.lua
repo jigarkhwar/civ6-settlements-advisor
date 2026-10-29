@@ -4,7 +4,7 @@ local Maps = dofile("tests/fixtures/maps/basic.lua")
 
 local T = {}
 
-local MODULES = { "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse",
+local MODULES = { "SA_World", "SA_Rules", "SA_Candidates", "SA_Prior", "SA_Tiles", "SA_Score", "SA_Coarse", "SA_Growth", "SA_Specialize",
   "SA_Rank", "SA_Scheduler" }
 
 local function run(map, shuffleSeed)

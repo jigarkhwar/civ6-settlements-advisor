@@ -24,7 +24,8 @@ end
 
 local NAME_TABLES = {
   { "TERRAIN_", "Terrains" }, { "FEATURE_", "Features" }, { "IMPROVEMENT_", "Improvements" },
-  { "RESOURCE_", "Resources" }, { "DISTRICT_", "Districts" },
+  { "RESOURCE_", "Resources" }, { "DISTRICT_", "Districts" }, { "BUILDING_", "Buildings" },
+  { "TRAIT_", "Traits" },
 }
 
 -- ===========================================================================
@@ -291,9 +292,18 @@ local function counted(names, limit)
   return table.concat(parts, ", ")
 end
 
--- Three to five short lines without arithmetic: districts, water, plots, resources.
+-- Three to six short lines without arithmetic: growth, districts, water, plots, resources.
 function SA_Explain.Why(site)
   local lines = {}
+
+  -- How big the city grows and how many districts that allows (002 R3, FR-010).
+  local f = site.Forecast
+  if f ~= nil then
+    local text = Locale.Lookup("LOC_SA_WHY_GROWTH", f.Population, f.Limit)
+    if f.LimitedBy == "food" then text = Locale.Lookup("LOC_SA_WHY_GROWTH_FOOD", text)
+    elseif f.LimitedBy == "housing" then text = Locale.Lookup("LOC_SA_WHY_GROWTH_HOUSING", text) end
+    lines[#lines + 1] = text
+  end
 
   -- Districts: the layout's best ones with their adjacency, as Detailed Map Tacks shows it.
   local dist = componentOf(site, "Districts")
@@ -374,7 +384,52 @@ local function pricesLine()
   return Locale.Lookup("LOC_SA_PRICES", table.concat(parts, " "))
 end
 
--- opts: Refining (bool), Rank (1–3 or nil), TopProven (bool).
+-- The Settler's verdict in words (002 research R2, contracts/ui.md): nil for no verdict.
+function SA_Explain.VerdictText(v)
+  if v == nil or v.Kind == nil then return nil end
+  local text
+  if v.Kind == "go" then
+    text = Locale.Lookup("LOC_SA_VERDICT_GO", math.floor((v.Gain or 0) + 0.5), v.Turns or 0)
+  elseif v.Kind == "here" and v.Here == v.Best then
+    text = Locale.Lookup("LOC_SA_VERDICT_HERE_BEST")
+  else
+    local percent = math.floor((v.Share or 0) * 100 + 0.5)
+    text = Locale.Lookup(v.Kind == "next" and "LOC_SA_VERDICT_NEXT" or "LOC_SA_VERDICT_HERE", percent, v.Turns or 0)
+  end
+  if v.LowData then text = Locale.Lookup("LOC_SA_VERDICT_LOW_DATA", text) end
+  return text
+end
+
+-- A strategy signal in words (002 R4): the unique district it replaces, the unique building,
+-- the trait's name, or the leader's AI preferences.
+local function signalText(sig)
+  if sig.Kind == "none" then return Locale.Lookup("LOC_SA_SIGNAL_NONE") end
+  if sig.Kind == "district" then return Locale.Lookup("LOC_SA_SIGNAL_DISTRICT", param(sig.Item), param(sig.Target)) end
+  if sig.Kind == "building" then return param(sig.Item) end
+  if sig.Kind == "ai" or sig.Kind == "aiVictory" then return Locale.Lookup("LOC_SA_SIGNAL_AI") end
+  return param(sig.Trait)
+end
+
+-- "Strategy: science — Seowon instead of Campus, …" (002 R9, FR-017): up to two reasons.
+function SA_Explain.StrategyText(strategy)
+  if strategy == nil or strategy.Victory == nil then return nil end
+  local parts, seen = {}, {}
+  for _, sig in ipairs(strategy.Reasons or {}) do
+    local t = signalText(sig)
+    if t ~= nil and t ~= "" and not seen[t] then
+      seen[t] = true
+      parts[#parts + 1] = t
+      if #parts >= 2 then break end
+    end
+  end
+  if #parts == 0 then parts[1] = Locale.Lookup("LOC_SA_SIGNAL_NONE") end
+  local name = Locale.Lookup("LOC_SA_STRATEGY_" .. (strategy.Victory:gsub("^VICTORY_", "")))
+  return Locale.Lookup("LOC_SA_WHY_STRATEGY", name, table.concat(parts, ", "))
+end
+
+-- opts: Refining (bool), Rank (1–3 or nil), TopProven (bool), Travel ({ Turns, Penalty } or
+-- false), Verdict (the Settler's verdict: shown on its own plot only), Strategy (the empire's
+-- strategy: its line follows the growth line, then the site's specialization).
 function SA_Explain.Lines(site, top1, opts)
   opts = opts or {}
   if not site.Legal then return { SA_Explain.Refusal(site.Refusal) } end
@@ -393,7 +448,17 @@ function SA_Explain.Lines(site, top1, opts)
       lines[#lines + 1] = Locale.Lookup("LOC_SA_WHY_TRAVEL", opts.Travel.Turns, SA_Explain.Num(opts.Travel.Penalty or 0))
     end
   end
-  for _, l in ipairs(SA_Explain.Why(site)) do lines[#lines + 1] = l end
+  if opts.Verdict ~= nil and opts.Verdict.Here == site.Index then
+    lines[#lines + 1] = SA_Explain.VerdictText(opts.Verdict)
+  end
+  -- Growth, strategy, specialization, then the words of 001 (contracts/ui.md).
+  local why, from = SA_Explain.Why(site), 1
+  if site.Forecast ~= nil and why[1] ~= nil then lines[#lines + 1] = why[1]; from = 2 end
+  local strategy = SA_Explain.StrategyText(opts.Strategy)
+  if strategy ~= nil then lines[#lines + 1] = strategy end
+  local spec = site.Layout and site.Layout.Specialization
+  if spec ~= nil then lines[#lines + 1] = Locale.Lookup("LOC_SA_WHY_SPECIALIZATION", param(spec)) end
+  for i = from, #why do lines[#lines + 1] = why[i] end
 
   if top1 ~= nil and top1.Index ~= site.Index and top1.Components ~= nil then
     local d = SA_Explain.Diff(site, top1)

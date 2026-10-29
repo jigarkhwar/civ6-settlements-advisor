@@ -1,0 +1,105 @@
+name: Ошибка
+description: Мод ведёт себя не так, тормозит или роняет игру
+title: "[Ошибка] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо! Чем точнее шаги и чем больше приложено (сохранение, лог, скриншот), тем быстрее найдём причину.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Где проблема
+      multiple: true
+      options:
+        - Линза и тройка мест для Поселенца
+        - Подсказка при наведении
+        - Раскладка районов
+        - Метки на карте (районы, площадь, города треугольника, улучшения)
+        - Тормоза
+        - Вылет игры
+        - Другое
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Что случилось
+      description: Что ты видишь и почему это неправильно.
+      placeholder: "Например: метки Кампуса второго города переставляются каждый ход без видимой причины."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидалось
+      placeholder: "Например: метка остаётся на месте, пока не появится заметно лучшая клетка."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить
+      description: Шаги от загрузки сохранения. Координаты клеток (x, y) очень помогают.
+      placeholder: |
+        1. Загрузить сохранение
+        2. Выбрать Поселенца у (60, 20)
+        3. Навести курсор на (63, 22)
+        4. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Как часто
+      options:
+        - Всегда
+        - Иногда
+        - Один раз
+    validations:
+      required: true
+
+  - type: input
+    id: game
+    attributes:
+      label: Партия
+      description: Цивилизация и лидер, ход, скорость игры, тип и размер карты.
+      placeholder: "Кри, Паундмейкер, ход 42, стандартная скорость, Континенты, маленькая"
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: Платформа и версии
+      description: ОС, версия игры, версия Detailed Map Tacks, коммит мода (git rev-parse --short HEAD).
+      placeholder: "macOS 27, Civ VI 1.0.12, DMT из Steam Workshop, мод 14cf161"
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Другие включённые моды
+      placeholder: "Только Detailed Map Tacks"
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Лог
+      description: |
+        Строки `SA_ERROR`, `SA_SLOW`, `SA_PINS`, `SA_PLAZA` из `logs/tuner.log` (`python3 tools/tuner.py serve`)
+        или из `Lua.log` игры (Windows). Для вылета — ещё и время вылета.
+      render: text
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Скриншоты и сохранение
+      description: Перетащи сюда скриншот и сохранение (.Civ6Save, лучше упаковать в .zip) того хода, где видно проблему.

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- World-anchored context: numbers 1–3 and messages are drawn over map plots.
+     Built from the game's own map pin textures and styles so the markers look native. -->
+<Context Layer="WorldAnchor">
+  <Container ID="Anchors" />
+
+  <!-- A map-pin flag with the rank inside and the site score on a yield plate under it. -->
+  <Instance Name="SA_NumberInstance">
+    <WorldAnchor ID="Anchor">
+      <Container Anchor="C,B" Size="48,48">
+        <Container Anchor="C,C" Size="50,50">
+          <Image Texture="MapPin" Size="59,79" Anchor="C,T" Offset="1,-16" />
+          <Image ID="FlagOutline" Texture="MapPinFlag" TextureOffset="0,0" Size="50,50" Anchor="C,T" />
+          <Image ID="Flag" Texture="MapPinFlag" TextureOffset="150,0" Size="50,50" Anchor="C,T" />
+          <Image ID="FlagLighten" Texture="MapPinFlag" TextureOffset="150,50" Size="50,50" Anchor="C,T" />
+          <Image ID="FlagDarken" Texture="MapPinFlag" TextureOffset="150,100" Size="50,50" Anchor="C,T" />
+          <Image Texture="MapPinFlag" TextureOffset="100,0" Size="50,50" Anchor="C,T" />
+          <Label ID="Number" Style="FlairShadow22" Anchor="C,T" Offset="0,12" String="1" />
+          <Grid ID="ScoreBacking" Style="YieldBacking" Size="auto,24" Anchor="C,B" Offset="1,-17" Color="0,0,0,160">
+            <Label ID="Score" Style="YieldBonusText" Anchor="C,C" Offset="0,0.5" />
+          </Grid>
+        </Container>
+      </Container>
+    </WorldAnchor>
+  </Instance>
+
+  <!-- Worked plot of the previewed site: its yields on a small translucent plate (FR-016a, R25). -->
+  <Instance Name="SA_WorkInstance">
+    <WorldAnchor ID="Anchor">
+      <Grid ID="Backing" Style="YieldBacking" Size="auto,20" Anchor="C,C" Offset="0,8" Color="0,0,0,110"
+            AutoSizePadding="4,0">
+        <Label ID="Yields" Style="FontNormal12" Anchor="C,C" Offset="0,0.5" />
+      </Grid>
+    </WorldAnchor>
+  </Instance>
+
+  <!-- A planned district of the previewed site: its icon and adjacency bonus (FR-016). -->
+  <Instance Name="SA_DistrictInstance">
+    <WorldAnchor ID="Anchor">
+      <Container Anchor="C,C" Size="64,64">
+        <Image ID="Icon" Anchor="C,C" Offset="0,-8" Size="32,32" Color="255,255,255,230" />
+        <Grid ID="YieldBacking" Style="YieldBacking" Size="auto,20" Anchor="C,C" Offset="0,14" Color="0,0,0,150"
+              AutoSizePadding="4,0">
+          <Label ID="Yields" Style="FontNormal12" Anchor="C,C" Offset="0,0.5" />
+        </Grid>
+      </Container>
+    </WorldAnchor>
+  </Instance>
+
+  <!-- A dark translucent plate, like the name plate of a map pin. -->
+  <Instance Name="SA_MessageInstance">
+    <WorldAnchor ID="Anchor">
+      <Container Anchor="C,B" Size="48,48">
+        <Image ID="Backing" Texture="Controls_DropShadow4" Color="0,0,0,170" Size="auto,22" Anchor="C,T"
+               Offset="0,-30" StretchMode="Fill" AutoSizePadding="15,8">
+          <Label ID="Text" Style="FontNormal14" FontStyle="Glow" ColorSet="BodyTextBright" Anchor="C,C" />
+        </Image>
+      </Container>
+    </WorldAnchor>
+  </Instance>
+</Context>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <Replace Tag="LOC_SA_MOD_NAME" Language="en_US"><Text>Settlements Advisor</Text></Replace>
+    <Replace Tag="LOC_SA_MOD_TEASER" Language="en_US"><Text>Select a Settler and see the best city sites, their district layouts and why.</Text></Replace>
+    <Replace Tag="LOC_SA_MOD_DESCRIPTION" Language="en_US"><Text>When a Settler is selected, the map is colored by how good each city site is, the three best sites nearby are numbered, and the best district layout is previewed around the site under the cursor. The plot tooltip explains every number. Uses only what the player can see. Gathering Storm only. Requires Detailed Map Tacks.</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_NO_SITES" Language="en_US"><Text>No suitable city sites in the explored part of the map</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_NO_SITES_NEARBY" Language="en_US"><Text>No suitable city sites nearby</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_RULESET" Language="en_US"><Text>Settlements Advisor supports Gathering Storm only</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_NO_DMT" Language="en_US"><Text>Detailed Map Tacks could not be loaded: districts are not planned</Text></Replace>
+    <Replace Tag="LOC_SA_STATUS_REFINING" Language="en_US"><Text>Refining…</Text></Replace>
+
+    <!-- Tooltip -->
+    <Replace Tag="LOC_SA_DECIMAL_SEPARATOR" Language="en_US"><Text>.</Text></Replace>
+    <Replace Tag="LOC_SA_TITLE" Language="en_US"><Text>City site: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_TITLE_REFINING" Language="en_US"><Text>City site: {1} (refining)</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF" Language="en_US"><Text>Versus #1: {1} ({2})</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF_PLAIN" Language="en_US"><Text>Versus #1: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF_MISSING" Language="en_US"><Text>no {1}</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF_BUT" Language="en_US"><Text>but {1}</Text></Replace>
+    <Replace Tag="LOC_SA_RANGE" Language="en_US"><Text>Range: {1}–{2} · unexplored plots: {3}</Text></Replace>
+    <Replace Tag="LOC_SA_AND_MORE" Language="en_US"><Text>and {1} more</Text></Replace>
+    <Replace Tag="LOC_SA_RANK_PROVEN" Language="en_US"><Text>Site #{1} · top three proven</Text></Replace>
+    <Replace Tag="LOC_SA_RANK_REFINING" Language="en_US"><Text>Site #{1} · top three refining</Text></Replace>
+    <Replace Tag="LOC_SA_PRICES" Language="en_US"><Text>Prices: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_TRAVEL" Language="en_US"><Text>Road: {1} turns — minus {2} to the score</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_TRAVEL_NOW" Language="en_US"><Text>The city can be founded right away</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_UNREACHABLE" Language="en_US"><Text>The Settler cannot get here</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DISTRICTS" Language="en_US"><Text>Districts: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DISTRICTS_NONE" Language="en_US"><Text>Districts: no adjacency bonuses here</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DISTRICTS_PENDING" Language="en_US"><Text>Districts: layout in progress…</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_FRESH" Language="en_US"><Text>Fresh water: the city grows without an Aqueduct</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_AQUEDUCT" Language="en_US"><Text>No fresh water: growth needs an Aqueduct</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DRY" Language="en_US"><Text>No fresh water and no place for an Aqueduct: growth is limited</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_TILES" Language="en_US"><Text>Plots: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_RESOURCES" Language="en_US"><Text>Luxuries and strategics: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_UNEXPLORED" Language="en_US"><Text>Unexplored plots around: {1} — the estimate is rough</Text></Replace>
+
+    <Replace Tag="LOC_SA_COMP_TILES" Language="en_US"><Text>Plots</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_WATER" Language="en_US"><Text>Water and housing</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_LUXURY" Language="en_US"><Text>Luxuries</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_STRATEGIC" Language="en_US"><Text>Strategics</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_ONETIME" Language="en_US"><Text>One-time yields</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_DISTRICTS" Language="en_US"><Text>Districts</Text></Replace>
+
+    <Replace Tag="LOC_SA_REASON_CENTER" Language="en_US"><Text>city center</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_TILE" Language="en_US"><Text>{1}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_TILE_EXPECTED" Language="en_US"><Text>unexplored plot (expected)</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_PRIOR_TERRAIN" Language="en_US"><Text>expected: {1} (neighbors: {2})</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_EATEN" Language="en_US"><Text>{1} citizens eat {2} food</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_FOOD_LIMIT" Language="en_US"><Text>food feeds {1} of {2} citizens</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_PLOTS_LIMIT" Language="en_US"><Text>free plots for {1} of {2} citizens</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LOWLAND" Language="en_US"><Text>lowlands: {1} taken off for flood risk</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_WATER_FRESH" Language="en_US"><Text>fresh water: {1} housing</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_WATER_COAST" Language="en_US"><Text>coast: {1} housing</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_WATER_NONE" Language="en_US"><Text>no water: {1} housing</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_AQUEDUCT_HOUSING" Language="en_US"><Text>Aqueduct: +{1} housing</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_IMPROVEMENT_HOUSING" Language="en_US"><Text>housing from improvements: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_EARLY_GROWTH" Language="en_US"><Text>early growth before an Aqueduct: +{1} citizens</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_AQUEDUCT_COST" Language="en_US"><Text>needs an Aqueduct: production and a plot</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LUXURY_NEW" Language="en_US"><Text>{1}: new kind, {2} cities</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LUXURY_DUP" Language="en_US"><Text>{1}: duplicate</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_AMENITY_RULE" Language="en_US"><Text>one amenity: +{1}% of the city's non-food yields</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_STRATEGIC_NEW" Language="en_US"><Text>{1}: {2} per turn, new kind</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_STRATEGIC" Language="en_US"><Text>{1}: {2} per turn</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_CLEAR_FEATURE" Language="en_US"><Text>{1}: cleared</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_DISTRICTS_PENDING" Language="en_US"><Text>districts come with the layout</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_DISTRICT" Language="en_US"><Text>{1} {2}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_DISTRICT_UNPLACED" Language="en_US"><Text>{1}: no place for it</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LAYOUT_PROVEN" Language="en_US"><Text>layout: best of all options</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LAYOUT_BEST_FOUND" Language="en_US"><Text>layout: best found</Text></Replace>
+
+    <Replace Tag="LOC_SA_REFUSAL" Language="en_US"><Text>A city cannot be founded here: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_UNREVEALED" Language="en_US"><Text>plot not explored</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_NATURAL_WONDER" Language="en_US"><Text>natural wonder</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_WATER" Language="en_US"><Text>water</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_MOUNTAIN" Language="en_US"><Text>mountains</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_IMPASSABLE" Language="en_US"><Text>impassable plot</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_FEATURE_FORBIDS" Language="en_US"><Text>cities cannot be founded on this feature</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_FLOODED" Language="en_US"><Text>flooded lowland</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_FOREIGN_TERRITORY" Language="en_US"><Text>foreign territory</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_TOO_CLOSE_TO_CITY" Language="en_US"><Text>too close to a city</Text></Replace>
+  </LocalizedText>
+</GameData>

@@ -1,0 +1,9 @@
+.tools/
+logs/
+tests/saves/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+__pycache__/
+*.pyc

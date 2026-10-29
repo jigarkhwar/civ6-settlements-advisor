@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <Replace Tag="LOC_SA_MOD_NAME" Language="ru_RU"><Text>Советник по городам</Text></Replace>
+    <Replace Tag="LOC_SA_MOD_TEASER" Language="ru_RU"><Text>Выделите Поселенца — и сразу видно лучшие места для города, раскладку районов и почему.</Text></Replace>
+    <Replace Tag="LOC_SA_MOD_DESCRIPTION" Language="ru_RU"><Text>При выделении Поселенца карта окрашивается по качеству мест для города, три лучших места рядом получают номера, а вокруг места под курсором показана лучшая раскладка районов. Подсказка клетки объясняет каждое число. Использует только то, что видит игрок. Только Gathering Storm. Нужен Detailed Map Tacks.</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_NO_SITES" Language="ru_RU"><Text>В открытой части карты нет подходящих мест для города</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_NO_SITES_NEARBY" Language="ru_RU"><Text>Рядом нет подходящих мест для города</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_RULESET" Language="ru_RU"><Text>Советник по городам поддерживает только Gathering Storm</Text></Replace>
+    <Replace Tag="LOC_SA_MSG_NO_DMT" Language="ru_RU"><Text>Не удалось подключить Detailed Map Tacks: районы не планируются</Text></Replace>
+    <Replace Tag="LOC_SA_STATUS_REFINING" Language="ru_RU"><Text>Уточняется…</Text></Replace>
+
+    <!-- Tooltip -->
+    <Replace Tag="LOC_SA_DECIMAL_SEPARATOR" Language="ru_RU"><Text>,</Text></Replace>
+    <Replace Tag="LOC_SA_TITLE" Language="ru_RU"><Text>Место для города: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_TITLE_REFINING" Language="ru_RU"><Text>Место для города: {1} (уточняется)</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF" Language="ru_RU"><Text>Против № 1: {1} ({2})</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF_PLAIN" Language="ru_RU"><Text>Против № 1: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF_MISSING" Language="ru_RU"><Text>нет: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_DIFF_BUT" Language="ru_RU"><Text>зато {1}</Text></Replace>
+    <Replace Tag="LOC_SA_RANGE" Language="ru_RU"><Text>Диапазон: {1}–{2} · неоткрытых клеток: {3}</Text></Replace>
+    <Replace Tag="LOC_SA_AND_MORE" Language="ru_RU"><Text>и ещё {1}</Text></Replace>
+    <Replace Tag="LOC_SA_RANK_PROVEN" Language="ru_RU"><Text>Место № {1} · тройка доказана</Text></Replace>
+    <Replace Tag="LOC_SA_RANK_REFINING" Language="ru_RU"><Text>Место № {1} · тройка уточняется</Text></Replace>
+    <Replace Tag="LOC_SA_PRICES" Language="ru_RU"><Text>Цены: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_TRAVEL" Language="ru_RU"><Text>Дорога: {1} ход. — минус {2} к баллу</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_TRAVEL_NOW" Language="ru_RU"><Text>Город можно основать сразу</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_UNREACHABLE" Language="ru_RU"><Text>Поселенец сюда не дойдёт</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DISTRICTS" Language="ru_RU"><Text>Районы: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DISTRICTS_NONE" Language="ru_RU"><Text>Районы: соседских бонусов здесь нет</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DISTRICTS_PENDING" Language="ru_RU"><Text>Районы: раскладка считается…</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_FRESH" Language="ru_RU"><Text>Пресная вода: город растёт без Акведука</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_AQUEDUCT" Language="ru_RU"><Text>Без пресной воды: для роста нужен Акведук</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_DRY" Language="ru_RU"><Text>Без пресной воды и без места под Акведук: рост ограничен</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_TILES" Language="ru_RU"><Text>Клетки: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_RESOURCES" Language="ru_RU"><Text>Роскошь и стратегические: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_WHY_UNEXPLORED" Language="ru_RU"><Text>Не открыто клеток вокруг: {1} — оценка приблизительная</Text></Replace>
+
+    <Replace Tag="LOC_SA_COMP_TILES" Language="ru_RU"><Text>Клетки</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_WATER" Language="ru_RU"><Text>Вода и жильё</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_LUXURY" Language="ru_RU"><Text>Роскошь</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_STRATEGIC" Language="ru_RU"><Text>Стратегические</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_ONETIME" Language="ru_RU"><Text>Разовые доходы</Text></Replace>
+    <Replace Tag="LOC_SA_COMP_DISTRICTS" Language="ru_RU"><Text>Районы</Text></Replace>
+
+    <Replace Tag="LOC_SA_REASON_CENTER" Language="ru_RU"><Text>центр города</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_TILE" Language="ru_RU"><Text>{1}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_TILE_EXPECTED" Language="ru_RU"><Text>неоткрытая клетка (ожидаемо)</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_PRIOR_TERRAIN" Language="ru_RU"><Text>ожидаемо: {1} (по соседям: {2})</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_EATEN" Language="ru_RU"><Text>{1} жителей съедают {2} еды</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_FOOD_LIMIT" Language="ru_RU"><Text>еды хватает на {1} жителей из {2}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_PLOTS_LIMIT" Language="ru_RU"><Text>свободных клеток хватает на {1} жителей из {2}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LOWLAND" Language="ru_RU"><Text>низины: за риск затопления снято {1}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_WATER_FRESH" Language="ru_RU"><Text>пресная вода: {1} жилья</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_WATER_COAST" Language="ru_RU"><Text>побережье: {1} жилья</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_WATER_NONE" Language="ru_RU"><Text>без воды: {1} жилья</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_AQUEDUCT_HOUSING" Language="ru_RU"><Text>Акведук: +{1} жилья</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_IMPROVEMENT_HOUSING" Language="ru_RU"><Text>жильё от улучшений: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_EARLY_GROWTH" Language="ru_RU"><Text>ранний рост до Акведука: +{1} жит.</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_AQUEDUCT_COST" Language="ru_RU"><Text>нужен Акведук: производство и клетка</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LUXURY_NEW" Language="ru_RU"><Text>{1}: новый вид, городов {2}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LUXURY_DUP" Language="ru_RU"><Text>{1}: повтор</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_AMENITY_RULE" Language="ru_RU"><Text>единица довольства: +{1}% доходов города без еды</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_STRATEGIC_NEW" Language="ru_RU"><Text>{1}: {2} в ход, нового вида</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_STRATEGIC" Language="ru_RU"><Text>{1}: {2} в ход</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_CLEAR_FEATURE" Language="ru_RU"><Text>{1}: вырубка</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_DISTRICTS_PENDING" Language="ru_RU"><Text>районы появятся с раскладкой</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_DISTRICT" Language="ru_RU"><Text>{1} {2}</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_DISTRICT_UNPLACED" Language="ru_RU"><Text>{1}: негде поставить</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LAYOUT_PROVEN" Language="ru_RU"><Text>раскладка: лучшая из всех вариантов</Text></Replace>
+    <Replace Tag="LOC_SA_REASON_LAYOUT_BEST_FOUND" Language="ru_RU"><Text>раскладка: лучшая найденная</Text></Replace>
+
+    <Replace Tag="LOC_SA_REFUSAL" Language="ru_RU"><Text>Город здесь основать нельзя: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_UNREVEALED" Language="ru_RU"><Text>клетка не открыта</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_NATURAL_WONDER" Language="ru_RU"><Text>чудо природы</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_WATER" Language="ru_RU"><Text>вода</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_MOUNTAIN" Language="ru_RU"><Text>горы</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_IMPASSABLE" Language="ru_RU"><Text>непроходимая клетка</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_FEATURE_FORBIDS" Language="ru_RU"><Text>на этой особенности город не ставится</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_FLOODED" Language="ru_RU"><Text>затопленная низина</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_FOREIGN_TERRITORY" Language="ru_RU"><Text>чужая территория</Text></Replace>
+    <Replace Tag="LOC_SA_REFUSAL_TOO_CLOSE_TO_CITY" Language="ru_RU"><Text>слишком близко к городу</Text></Replace>
+  </LocalizedText>
+</GameData>

@@ -7,3 +7,4 @@ Thumbs.db
 *.swp
 __pycache__/
 *.pyc
+tests/fixtures/gameinfo.lua

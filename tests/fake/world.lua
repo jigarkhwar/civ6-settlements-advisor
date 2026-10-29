@@ -83,7 +83,15 @@ local BOOL_COLUMNS = {
 
 local function loadRules()
   if RULES then return RULES end
-  local raw = dofile("tests/fixtures/gameinfo.lua")
+  -- The game's own tables are not in the repository (Firaxis data): each developer exports
+  -- them from their installed game.
+  local path = "tests/fixtures/gameinfo.lua"
+  local f = io.open(path, "r")
+  if f == nil then
+    error(path .. " is missing: run 'python3 -I tools/export_gameinfo.py' after starting a game once (see tests/README.md)", 0)
+  end
+  f:close()
+  local raw = dofile(path)
   for tname, cols in pairs(BOOL_COLUMNS) do
     for _, row in ipairs(raw[tname] or {}) do
       for _, c in ipairs(cols) do

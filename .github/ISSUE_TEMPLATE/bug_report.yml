@@ -6,7 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Спасибо! Чем точнее шаги и чем больше приложено (сохранение, лог, скриншот), тем быстрее найдём причину.
+        Спасибо! Чем точнее шаги и чем больше приложено, тем быстрее найдём причину.
+        **Как собрать сохранение, логи и отчёт о вылете одним архивом — [docs/diagnostics.md](https://github.com/jigarkhwar/civ6-settlements-advisor/blob/main/docs/diagnostics.md)**
+        (на macOS: `tools/collect_diagnostics.sh`, пока игра запущена).
 
   - type: dropdown
     id: area
@@ -94,12 +96,14 @@ body:
     attributes:
       label: Лог
       description: |
-        Строки `SA_ERROR`, `SA_SLOW`, `SA_PINS`, `SA_PLAZA` из `logs/tuner.log` (`python3 tools/tuner.py serve`)
-        или из `Lua.log` игры (Windows). Для вылета — ещё и время вылета.
+        Строки `SA_ERROR`, `SA_SLOW`, `SA_PINS` из `tuner-SA-lines.txt` архива диагностики
+        (или из `Lua.log` на Windows). Для вылета — время вылета. Весь архив прикладывай ниже.
       render: text
 
   - type: textarea
     id: attachments
     attributes:
-      label: Скриншоты и сохранение
-      description: Перетащи сюда скриншот и сохранение (.Civ6Save, лучше упаковать в .zip) того хода, где видно проблему.
+      label: Архив диагностики и скриншоты
+      description: Перетащи сюда `logs/diagnostics-*.zip` из `tools/collect_diagnostics.sh` (в нём сохранение, логи и отчёты о вылетах) и скриншот, где видно проблему.
+    validations:
+      required: true

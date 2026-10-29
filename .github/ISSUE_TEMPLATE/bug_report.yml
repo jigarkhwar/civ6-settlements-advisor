@@ -8,7 +8,7 @@ body:
       value: |
         Спасибо! Чем точнее шаги и чем больше приложено, тем быстрее найдём причину.
         **Как собрать сохранение, логи и отчёт о вылете одним архивом — [docs/diagnostics.md](https://github.com/jigarkhwar/civ6-settlements-advisor/blob/main/docs/diagnostics.md)**
-        (на macOS: `tools/collect_diagnostics.sh`, пока игра запущена).
+        Windows: двойной щелчок по `tools/collect_diagnostics.cmd` до перезапуска игры; macOS: `tools/collect_diagnostics.sh`.
 
   - type: dropdown
     id: area
@@ -80,8 +80,8 @@ body:
     id: platform
     attributes:
       label: Платформа и версии
-      description: ОС, версия игры, версия Detailed Map Tacks, коммит мода (git rev-parse --short HEAD).
-      placeholder: "macOS 27, Civ VI 1.0.12, DMT из Steam Workshop, мод 14cf161"
+      description: ОС, версия игры (видна в главном меню), откуда стоит Detailed Map Tacks, откуда и когда взят мод.
+      placeholder: "Windows 11, Civ VI 1.0.12.x, DMT из Steam Workshop, мод из main от 29.10"
     validations:
       required: true
 
@@ -96,14 +96,14 @@ body:
     attributes:
       label: Лог
       description: |
-        Строки `SA_ERROR`, `SA_SLOW`, `SA_PINS` из `tuner-SA-lines.txt` архива диагностики
-        (или из `Lua.log` на Windows). Для вылета — время вылета. Весь архив прикладывай ниже.
+        Строки `SA_ERROR`, `SA_SLOW`, `SA_PINS` из `lua-SA-lines.txt` (Windows) или `tuner-SA-lines.txt` (macOS)
+        архива диагностики. Для вылета — время вылета. Весь архив прикладывай ниже.
       render: text
 
   - type: textarea
     id: attachments
     attributes:
       label: Архив диагностики и скриншоты
-      description: Перетащи сюда `logs/diagnostics-*.zip` из `tools/collect_diagnostics.sh` (в нём сохранение, логи и отчёты о вылетах) и скриншот, где видно проблему.
+      description: Перетащи сюда архив диагностики (`SA-diagnostics-*.zip` с рабочего стола на Windows или `logs/diagnostics-*.zip` на macOS — в нём сохранение, логи и отчёты о вылетах) и скриншот, где видно проблему.
     validations:
       required: true

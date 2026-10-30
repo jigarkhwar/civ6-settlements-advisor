@@ -37,6 +37,10 @@
     <Replace Tag="LOC_SA_SIGNAL_DISTRICT" Language="en_US"><Text>{1} instead of {2}</Text></Replace>
     <Replace Tag="LOC_SA_SIGNAL_AI" Language="en_US"><Text>the leader&apos;s preferences</Text></Replace>
     <Replace Tag="LOC_SA_SIGNAL_NONE" Language="en_US"><Text>no clear lean</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_BUTTON" Language="en_US"><Text>Goal: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_AUTO" Language="en_US"><Text>Auto: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_AUTO_SHORT" Language="en_US"><Text>Auto ({1})</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_HINT" Language="en_US"><Text>Settlements Advisor plans districts for this goal. Auto follows your leader and civilization.</Text></Replace>
     <Replace Tag="LOC_SA_WHY_GROWTH" Language="en_US"><Text>The city grows to about {1} citizens → districts: {2}</Text></Replace>
     <Replace Tag="LOC_SA_WHY_GROWTH_FOOD" Language="en_US"><Text>{1} (food runs out beyond that)</Text></Replace>
     <Replace Tag="LOC_SA_WHY_GROWTH_HOUSING" Language="en_US"><Text>{1} (housing stops it)</Text></Replace>

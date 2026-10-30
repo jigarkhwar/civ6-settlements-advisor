@@ -134,15 +134,15 @@ description: "Задачи: специализация городов и тем�
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T032 [P] [US4] Порядок строк блока мода по contracts/ui.md (вердикт, рост, стратегия, специализация, затем строки 001) и сумма слагаемых = заголовок в tests/unit/test_explain.lua; ключи `LOC_SA_VICTORY_*` в обоих языках в tests/unit/test_text.lua
+- [X] T032 [P] [US4] Порядок строк блока мода по contracts/ui.md (вердикт, рост, стратегия, специализация, затем строки 001) и сумма слагаемых = заголовок в tests/unit/test_explain.lua; ключи `LOC_SA_VICTORY_*` в обоих языках в tests/unit/test_text.lua
 
 ### Implementation for User Story 4
 
-- [ ] T033 [US4] (игра закрыта) `PullDown` (`PullDownBlue`) и запасной контейнер в SettlementsAdvisor/UI/SA_Main.xml
-- [ ] T034 [US4] (игра закрыта) Список на `LoadScreenClose`: `ChangeParent` в `/InGame/TopPanel/RightContents` (иначе запасной контейнер), пункты «Авто: …» + `EnabledVictories`, текст кнопки и подсказка со стратегией в SettlementsAdvisor/UI/SA_Main.lua
-- [ ] T035 [US4] (игра закрыта) `SA_Victory`: чтение при загрузке, запись при выборе, пересчёт стратегии, плана (`requestEmpire(nil, true)`) и вида в SettlementsAdvisor/UI/SA_Main.lua
-- [ ] T036 [US4] (игра закрыта) Выгрузка контекста: список возвращается в свой контекст до `ClearUpdate`; ловушка «чужой стек держит элемент мёртвого контекста» в docs/pitfalls.md и SettlementsAdvisor/UI/SA_Main.lua
-- [ ] T037 [P] [US4] Тексты `LOC_SA_VICTORY_BUTTON`, `LOC_SA_VICTORY_AUTO` в SettlementsAdvisor/Text/SA_Text_ru_RU.xml и SA_Text_en_US.xml
+- [X] T033 [US4] (игра закрыта) `PullDown` (`PullDownBlue`) и запасной контейнер в SettlementsAdvisor/UI/SA_Main.xml
+- [X] T034 [US4] (игра закрыта) Список на `LoadScreenClose`: `ChangeParent` в `/InGame/TopPanel/StaticInfoStack` (стек не найден — списка нет), пункты «Авто: …» + `EnabledVictories`, текст кнопки и подсказка со стратегией в SettlementsAdvisor/UI/SA_Main.lua
+- [X] T035 [US4] (игра закрыта) `SA_Victory`: чтение при загрузке, запись при выборе, пересчёт стратегии, плана (`requestEmpire(nil, true)`) и вида в SettlementsAdvisor/UI/SA_Main.lua
+- [X] T036 [US4] (игра закрыта) Выгрузка контекста: список возвращается в свой контекст до `ClearUpdate`; ловушка «чужой стек держит элемент мёртвого контекста» в docs/pitfalls.md и SettlementsAdvisor/UI/SA_Main.lua
+- [X] T037 [P] [US4] Тексты `LOC_SA_VICTORY_BUTTON`, `LOC_SA_VICTORY_AUTO` в SettlementsAdvisor/Text/SA_Text_ru_RU.xml и SA_Text_en_US.xml
 - [ ] T038 [US4] Проверка в игре по quickstart (шаг 5): список виден, выбор меняет метки за ход, переживает сохранение и загрузку; результат в specs/002-city-specialization/plan.md
 
 **Checkpoint**: все истории работают; выбор победы управляет планом.

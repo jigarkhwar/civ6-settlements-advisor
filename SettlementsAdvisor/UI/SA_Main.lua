@@ -114,9 +114,14 @@ local m_planned = {}        -- plot -> district planned for the player's cities:
 local m_worldStale = true   -- borders may have moved: snapshots are rebuilt before the next plan
 local m_strategy = nil      -- the empire's strategy (002 US3): roles of districts in every plan
 local m_victoryChoice = "AUTO" -- the player's choice of victory (002 US4)
+local VICTORY_KEY = "SA_Victory" -- the choice in the save (contracts/ui.md)
+local TOP_STACK = "/InGame/TopPanel/StaticInfoStack"
+local TOP_INFO = "/InGame/TopPanel/InfoStack"
+local m_victoryStack = nil  -- the top panel's stack that holds the dropdown
 
 -- The strategy from the leader and civilization (002 R4): on load and each turn (policies and
 -- beliefs change the player's modifiers). A new victory makes every layout stale.
+-- Returns false when the strategy could not be made: the old one stays.
 local function refreshStrategy()
   local ok, s = pcall(SA_Strategy.Get, Game.GetLocalPlayer(), m_victoryChoice)
   if not ok then print("SA_ERROR strategy: " .. tostring(s)) return false end
@@ -128,7 +133,7 @@ local function refreshStrategy()
       if site.Status == "ready" then site.Stale = true end
     end
   end
-  return changed
+  return true
 end
 
 local function loadPinRecord(pid)
@@ -693,6 +698,98 @@ local function refreshView()
 end
 
 -- ===========================================================================
+-- The victory dropdown on the top panel (002 US4, contracts/ui.md)
+-- ===========================================================================
+
+-- The top panel fits its strategic resources into the width left by its stacks, and only when
+-- its yield or info stack changes size (TopPanel.lua): the dropdown goes into the info stack,
+-- after the trade and envoy counters, so that a new width moves the resources aside.
+local function resizeTopPanel()
+  m_victoryStack:CalculateSize()
+  local info = ContextPtr:LookUpControl(TOP_INFO)
+  if info ~= nil then info:CalculateSize() end
+end
+
+-- Without the top panel's stack the dropdown is not shown (its own container is hidden and lies
+-- in the map layer); the choice from the save still holds.
+local function attachVictoryPulldown()
+  if m_victoryStack ~= nil then return end
+  local stack = ContextPtr:LookUpControl(TOP_STACK)
+  if stack == nil then
+    print("SA_ERROR top panel stack not found: no victory dropdown")
+    return
+  end
+  Controls.VictoryPulldown:ChangeParent(stack)
+  m_victoryStack = stack
+end
+
+-- Back to this context before it goes (pitfall 25): the top panel must not keep a control of a
+-- freed context. When the top panel went first, the dropdown went with it: nothing to bring back.
+local function detachVictoryPulldown()
+  if m_victoryStack == nil then return end
+  local stack = ContextPtr:LookUpControl(TOP_STACK)
+  if stack ~= nil then
+    Controls.VictoryPulldown:ChangeParent(Controls.VictoryHome)
+    resizeTopPanel()
+  end
+  m_victoryStack = nil
+end
+
+local onVictoryChosen
+
+-- The button names the goal, its tooltip the strategy and why; the entries are "Auto: …" and
+-- the victories enabled in this game.
+local function fillVictoryPulldown()
+  local pulldown = Controls.VictoryPulldown
+  pulldown:SetHide(not m_supported or m_strategy == nil)
+  resizeTopPanel()
+  if pulldown:IsHidden() then return end
+  local button = pulldown:GetButton()
+  button:SetText(SA_Explain.VictoryButton(m_strategy))
+  button:SetToolTipString((SA_Explain.StrategyText(m_strategy) or "") .. "[NEWLINE][NEWLINE]"
+    .. Locale.Lookup("LOC_SA_VICTORY_HINT"))
+  pulldown:ClearEntries()
+  for _, e in ipairs(SA_Explain.VictoryEntries(m_strategy, SA_World.EnabledVictories())) do
+    local entry = {}
+    pulldown:BuildEntry("InstanceOne", entry)
+    entry.Button:SetText(e.Text)
+    entry.Button:RegisterCallback(Mouse.eLClick, function()
+      local ok, err = pcall(onVictoryChosen, e.Choice)
+      if not ok then print("SA_ERROR victory: " .. tostring(err)) end
+    end)
+  end
+  pulldown:CalculateInternals()
+end
+
+-- A top panel made again (its hot reload) took the dropdown with it: the stack is looked up each
+-- time, and an error forgets the dropdown instead of touching it again (pitfall 25).
+local function refreshVictoryPulldown()
+  if m_victoryStack == nil then return end
+  if ContextPtr:LookUpControl(TOP_STACK) == nil then m_victoryStack = nil return end
+  local ok, err = pcall(fillVictoryPulldown)
+  if not ok then
+    print("SA_ERROR victory dropdown: " .. tostring(err))
+    m_victoryStack = nil
+  end
+end
+
+-- A new goal: every plan made again for its key districts, then saved in the game; the mod's
+-- pins keep their stickiness (SA_Layout.KEEP_BONUS). A failed strategy keeps the old goal.
+onVictoryChosen = function(choice)
+  if choice == m_victoryChoice then return end
+  local previous = m_victoryChoice
+  m_victoryChoice = choice
+  if not refreshStrategy() then m_victoryChoice = previous return end
+  PlayerConfigurations[Game.GetLocalPlayer()]:SetValue(VICTORY_KEY, choice)
+  refreshVictoryPulldown()
+  requestEmpire(nil, true)
+  refreshView()
+end
+
+-- Debug: the same choice from FireTuner, SA_ChooseVictory("VICTORY_RELIGIOUS").
+function SA_ChooseVictory(choice) onVictoryChosen(SA_Strategy.Choice(choice)) end
+
+-- ===========================================================================
 -- Events
 -- ===========================================================================
 
@@ -731,7 +828,11 @@ local function OnLoadScreenClose()
     m_dmtReady = ok == true
     print("SA_DMT ready=" .. tostring(m_dmtReady) .. (err and (" error=" .. tostring(err)) or ""))
     m_strategy = nil
+    local value = PlayerConfigurations[Game.GetLocalPlayer()]:GetValue(VICTORY_KEY)
+    m_victoryChoice = SA_Strategy.Choice(value)
     refreshStrategy()
+    attachVictoryPulldown()
+    refreshVictoryPulldown()
     enqueueAll()
     -- Cities with the mod's pins are planned again on load: things changed while it was off.
     if #SA_Empire.Cities(Game.GetLocalPlayer()) > 0 then requestEmpire(nil, true) end
@@ -745,6 +846,7 @@ local function OnLocalPlayerTurnBegin()
   if not m_dmtReady then return end
   SA_DMT.RefreshModifiers()
   refreshStrategy()
+  refreshVictoryPulldown()
   m_worldStale = true
   local pid = Game.GetLocalPlayer()
   if #SA_Empire.Cities(pid) > 0 then requestEmpire(nil, #SA_World.Settlers(pid) > 0) end
@@ -896,6 +998,7 @@ local function Initialize()
     -- reload without this, pitfall 18).
     Shared.Active = false
     Shared.GetLines = nil
+    detachVictoryPulldown()
     ContextPtr:ClearUpdate()
     clearDrawing()
     m_numbers:DestroyInstances()

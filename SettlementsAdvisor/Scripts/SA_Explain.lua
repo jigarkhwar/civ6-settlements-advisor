@@ -410,6 +410,10 @@ local function signalText(sig)
   return param(sig.Trait)
 end
 
+local function strategyName(victory)
+  return Locale.Lookup("LOC_SA_STRATEGY_" .. (victory:gsub("^VICTORY_", "")))
+end
+
 -- "Strategy: science — Seowon instead of Campus, …" (002 R9, FR-017): up to two reasons.
 function SA_Explain.StrategyText(strategy)
   if strategy == nil or strategy.Victory == nil then return nil end
@@ -423,8 +427,29 @@ function SA_Explain.StrategyText(strategy)
     end
   end
   if #parts == 0 then parts[1] = Locale.Lookup("LOC_SA_SIGNAL_NONE") end
-  local name = Locale.Lookup("LOC_SA_STRATEGY_" .. (strategy.Victory:gsub("^VICTORY_", "")))
-  return Locale.Lookup("LOC_SA_WHY_STRATEGY", name, table.concat(parts, ", "))
+  return Locale.Lookup("LOC_SA_WHY_STRATEGY", strategyName(strategy.Victory), table.concat(parts, ", "))
+end
+
+local function victoryName(victory)
+  local row = GameInfo.Victories[victory]
+  return Locale.Lookup(row and row.Name or victory)
+end
+
+-- "Goal: Auto (science)" or "Goal: <victory>" on the dropdown button (contracts/ui.md).
+function SA_Explain.VictoryButton(strategy)
+  if strategy == nil or strategy.Victory == nil then return nil end
+  local name = strategy.Auto
+    and Locale.Lookup("LOC_SA_VICTORY_AUTO_SHORT", strategyName(strategy.AutoVictory or strategy.Victory))
+    or victoryName(strategy.Victory)
+  return Locale.Lookup("LOC_SA_VICTORY_BUTTON", name)
+end
+
+-- Dropdown entries { Choice, Text }: "Auto: <the leader's lean>", then the enabled victories.
+function SA_Explain.VictoryEntries(strategy, enabled)
+  local lean = strategy and (strategy.AutoVictory or strategy.Victory) or "BALANCED"
+  local out = { { Choice = "AUTO", Text = Locale.Lookup("LOC_SA_VICTORY_AUTO", strategyName(lean)) } }
+  for _, v in ipairs(enabled) do out[#out + 1] = { Choice = v, Text = victoryName(v) } end
+  return out
 end
 
 -- opts: Refining (bool), Rank (1–3 or nil), TopProven (bool), Travel ({ Turns, Penalty } or

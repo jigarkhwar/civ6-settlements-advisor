@@ -164,17 +164,24 @@ function SA_Strategy.Auto(signals, enabled)
   return best, scores, reasons[best]
 end
 
+-- The player's choice of victory (SA_Victory, 002 US4): a victory enabled in this game, else "AUTO".
+function SA_Strategy.Choice(value)
+  for _, v in ipairs(SA_World.EnabledVictories()) do
+    if v == value then return v end
+  end
+  return "AUTO"
+end
+
 -- The strategy (data-model Strategy). choice: "AUTO" or a victory enabled in the game; anything
 -- else counts as "AUTO".
 function SA_Strategy.Get(playerID, choice)
   local signals = SA_Strategy.Signals(playerID)
   local enabled = SA_World.EnabledVictories()
-  local isEnabled = {}
-  for _, v in ipairs(enabled) do isEnabled[v] = true end
   local autoVictory, scores, autoReasons = SA_Strategy.Auto(signals, enabled)
 
   local victory, auto = autoVictory, true
-  if choice ~= nil and choice ~= "AUTO" and isEnabled[choice] then victory, auto = choice, false end
+  choice = SA_Strategy.Choice(choice)
+  if choice ~= "AUTO" then victory, auto = choice, false end
 
   local roles = {}
   for _, d in ipairs(SA_Rules.VICTORY_DISTRICTS[victory] or {}) do roles[d] = "key" end

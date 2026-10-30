@@ -4,6 +4,13 @@
 <Context Layer="WorldAnchor">
   <Container ID="Anchors" />
 
+  <!-- The victory dropdown (002 US4): moved into the top panel's info stack on load and brought
+       back before this context goes (pitfall 25). Its home is hidden: this context lies in the
+       map layer, so the dropdown is only shown in the top panel. -->
+  <Container ID="VictoryHome" Size="240,24" Hidden="1">
+    <PullDown ID="VictoryPulldown" Style="PullDownBlue" Size="240,24" Hidden="1" />
+  </Container>
+
   <!-- A map-pin flag with the rank inside and the site score on a yield plate under it. -->
   <Instance Name="SA_NumberInstance">
     <WorldAnchor ID="Anchor">

@@ -250,6 +250,10 @@ function T.test_strategy_and_specialization_lines()
   truthy(lines[3]:find("Стратегия:", 1, true), "then the strategy: " .. lines[3])
   truthy(lines[4]:find("Специализация:", 1, true) and lines[4]:find("CAMPUS", 1, true), "then the specialization: " .. lines[4])
   truthy(not table.concat(lines, "\n"):find("LOC_SA_", 1, true))
+  -- The new lines carry no numbers of the sum: the components still add up to the title (SC-004).
+  local sum = 0
+  for _, l in ipairs(componentLines(lines)) do sum = sum + tenths(l) end
+  eq(sum, tenths(lines[1]), "lines sum to the title")
   -- Balanced: said so.
   map.leader, map.civ = "LEADER_POUNDMAKER", "CIVILIZATION_CREE"
   setup(map)
@@ -257,6 +261,37 @@ function T.test_strategy_and_specialization_lines()
   truthy(SA_Explain.StrategyText(SA_Strategy.Get(0, "AUTO")):find("сбалансированная", 1, true))
 end
 
+-- The victory dropdown (002 US4, contracts/ui.md): "Auto: <what the leader leans to>" first,
+-- then the victories enabled in the game by their names in the rules; the button names the choice.
+function T.test_victory_dropdown()
+  local map = {}
+  for k, v in pairs(Maps.river) do map[k] = v end
+  map.leader, map.civ = "LEADER_SEONDEOK", "CIVILIZATION_KOREA"
+  map.victories = { "VICTORY_CONQUEST", "VICTORY_TECHNOLOGY", "VICTORY_CULTURE" }
+  setup(map)
+  local auto = SA_Strategy.Get(0, "AUTO")
+  local entries = SA_Explain.VictoryEntries(auto, SA_World.EnabledVictories())
+  eq(#entries, 4)
+  eq(entries[1].Choice, "AUTO")
+  eq(entries[1].Text, "Авто: наука")
+  eq(entries[2].Choice, "VICTORY_TECHNOLOGY", "victories in the order of contracts/ui.md")
+  eq(entries[2].Text, "LOC_VICTORY_SCIENCE_NAME", "the rules' own name (game texts are not loaded offline)")
+  eq(entries[3].Choice, "VICTORY_CULTURE")
+  eq(entries[4].Choice, "VICTORY_CONQUEST")
+  eq(SA_Explain.VictoryButton(auto), "Цель: Авто (наука)")
+
+  local chosen = SA_Strategy.Get(0, "VICTORY_CULTURE")
+  eq(SA_Explain.VictoryButton(chosen), "Цель: LOC_VICTORY_CULTURE_NAME")
+  eq(SA_Explain.VictoryEntries(chosen, SA_World.EnabledVictories())[1].Text, "Авто: наука",
+    "the auto entry still names the leader's lean")
+  eq(SA_Explain.VictoryButton(nil), nil)
+
+  map.leader, map.civ, map.victories = "LEADER_POUNDMAKER", "CIVILIZATION_CREE", nil
+  setup(map, "en_US")
+  eq(SA_Explain.VictoryButton(SA_Strategy.Get(0, "AUTO")), "Goal: Auto (balanced)")
+end
+
+-- The saved choice (SA_Victory): empty or unknown values mean AUTO (contracts/ui.md).
 function T.test_refusal_for_every_reason()
   setup(Maps.refusals)
   for _, r in ipairs({ "UNREVEALED", "NATURAL_WONDER", "WATER", "MOUNTAIN", "IMPASSABLE",

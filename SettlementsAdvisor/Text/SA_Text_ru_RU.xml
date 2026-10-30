@@ -37,6 +37,10 @@
     <Replace Tag="LOC_SA_SIGNAL_DISTRICT" Language="ru_RU"><Text>{1} вместо района «{2}»</Text></Replace>
     <Replace Tag="LOC_SA_SIGNAL_AI" Language="ru_RU"><Text>предпочтения лидера</Text></Replace>
     <Replace Tag="LOC_SA_SIGNAL_NONE" Language="ru_RU"><Text>явного уклона нет</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_BUTTON" Language="ru_RU"><Text>Цель: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_AUTO" Language="ru_RU"><Text>Авто: {1}</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_AUTO_SHORT" Language="ru_RU"><Text>Авто ({1})</Text></Replace>
+    <Replace Tag="LOC_SA_VICTORY_HINT" Language="ru_RU"><Text>Settlements Advisor планирует районы под эту цель. «Авто» — по лидеру и цивилизации.</Text></Replace>
     <Replace Tag="LOC_SA_WHY_GROWTH" Language="ru_RU"><Text>Город вырастет примерно до {1} жит. → районов: {2}</Text></Replace>
     <Replace Tag="LOC_SA_WHY_GROWTH_FOOD" Language="ru_RU"><Text>{1} (дальше не хватает еды)</Text></Replace>
     <Replace Tag="LOC_SA_WHY_GROWTH_HOUSING" Language="ru_RU"><Text>{1} (дальше упирается в жильё)</Text></Replace>

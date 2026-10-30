@@ -81,6 +81,17 @@ function T.test_choice_replaces_victory()
   eq(s2.Victory, "VICTORY_TECHNOLOGY")
 end
 
+-- The saved choice (SA_Victory): only a victory enabled in this game survives, else "AUTO".
+function T.test_choice_from_save()
+  setup("LEADER_SEONDEOK", "CIVILIZATION_KOREA", { "VICTORY_TECHNOLOGY", "VICTORY_CULTURE" })
+  eq(SA_Strategy.Choice(nil), "AUTO")
+  eq(SA_Strategy.Choice(""), "AUTO")
+  eq(SA_Strategy.Choice("VICTORY_FOO"), "AUTO")
+  eq(SA_Strategy.Choice("VICTORY_RELIGIOUS"), "AUTO", "a victory disabled in this game")
+  eq(SA_Strategy.Choice("VICTORY_CULTURE"), "VICTORY_CULTURE")
+  eq(SA_Strategy.Choice("AUTO"), "AUTO")
+end
+
 -- Only victories enabled in the game are chosen automatically.
 function T.test_auto_skips_disabled_victories()
   setup("LEADER_SEONDEOK", "CIVILIZATION_KOREA", { "VICTORY_CULTURE", "VICTORY_CONQUEST" })
